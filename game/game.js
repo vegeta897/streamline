@@ -11,16 +11,20 @@ Application.Services.service('Game', function(Canvas) {
     var ticks = 0;
     var frames = 0;
     var rendered = false;
+    var framesDropped = 0;
     
-    var now, dt = 0, last = performance.now(), step = 1000/60;
+    var now, dt = 0, last = performance.now(), step = 1000/60; // 60 FPS
     
-    var appStart = last;
     var boxStart = last;
     
     var tick = function() {
         now = performance.now(); dt += (now - last);
-        if(dt > step) { while(dt >= step) { dt -= step; update(step,dt,now); ticks++; } }
-        rendered = false; last = now;
+        if(dt > step) {
+            if(!rendered) { framesDropped++; } // If the last update wasn't rendered, we dropped a frame
+            while(dt >= step) { dt -= step; ticks++; update(step,dt,now); }
+            rendered = false;
+        }
+        last = now;
     };
     setInterval(tick,step);
     var frame = function() {
@@ -61,7 +65,7 @@ Application.Services.service('Game', function(Canvas) {
         mainContext.fillText('Box Reset Time Deviation: '+Math.floor(35000-boxTime)+'ms',50,220);
         mainContext.fillText('Frames: '+frames,50,250);
         mainContext.fillText('Ticks: '+ticks,50,280);
-        mainContext.fillText('Frames Dropped: '+(ticks-frames),50,310);
+        mainContext.fillText('Frames Dropped: '+framesDropped,50,310);
     };
 
     requestAnimationFrame(tick); // start the first frame
