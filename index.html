@@ -14,13 +14,17 @@
         <canvas id="mainCanvas" width="1200" height="600">
             Your browser doesn't support canvases. <a href="http://www.google.com/chrome">Get a better one.</a>
         </canvas>
-        <p>{{ test.text }}</p>
     </section>
     <section id="controls" ng-controller="Controls">
         <h2>Welcome to Streamline!</h2>
-        <p>{{ test.text }}</p>
-        <input type="text" ng-model="test.text" />
-        <button ng-click="changeMessage()">Change Message</button>
+        <p>Seconds Elapsed: <strong>{{ game.secondsElapsed }}</strong></p>
+        <p>FPS: <strong>{{ game.framesPerSecond }}</strong></p>
+        <p>Tickrate: <strong>{{ game.ticksPerSecond }}</strong></p>
+        <p>Frames: <strong>{{ game.frames }}</strong></p>
+        <p>Ticks: <strong>{{ game.ticks }}</strong></p>
+        <p>Frames Dropped: <strong>{{ game.framesDropped }}</strong></p>
+        <p>Stream Pixels: <strong>{{ game.objects.streams.count || 'None' }}</strong></p>
+        <button ng-click="refresh()">Refresh</button>
     </section>
     <!-- JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
