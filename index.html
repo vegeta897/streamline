@@ -17,13 +17,14 @@
     </section>
     <section id="controls" ng-controller="Controls">
         <h2>Welcome to Streamline!</h2>
-        <p>Seconds Elapsed: <strong>{{ game.secondsElapsed }}</strong></p>
-        <p>FPS: <strong>{{ game.framesPerSecond }}</strong></p>
-        <p>Tickrate: <strong>{{ game.ticksPerSecond }}</strong></p>
-        <p>Frames: <strong>{{ game.frames }}</strong></p>
-        <p>Ticks: <strong>{{ game.ticks }}</strong></p>
-        <p>Frames Dropped: <strong>{{ game.framesDropped }}</strong></p>
-        <p>Stream Pixels: <strong>{{ game.objects.streams.length }}</strong></p>
+        <dl>
+            <dt>Game-Seconds Elapsed: <strong>{{ game.secondsElapsed }}</strong></dt>
+            <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
+            <dt>Frame Count: <strong>{{ game.frames }}</strong></dt>
+            <dt>Frames Dropped: <strong>{{ game.framesDropped }}</strong></dt>
+            <dt>Global Tick: <strong>{{ game.ticks }}</strong></dt>
+            <dt>Stream Pixels: <strong>{{ game.objects.streams.length }}</strong></dt>
+        </dl>
     </section>
     <!-- JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
@@ -34,5 +35,6 @@
     <script src="controls/controls.js"></script>
     <script src="game/game.js"></script>
     <script src="game/objects.js"></script>
+    <script src="js/vendor/seedrandom.js"></script>
 </body>
 </html>

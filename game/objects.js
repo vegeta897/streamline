@@ -23,8 +23,9 @@ Application.Services.factory('Objects', function() {
     }
     
     return {
-        StreamPixel: function(arena) {
+        StreamPixel: function(arena,ticks) {
             var sp = new Movable(arena);
+            Math.seedrandom(ticks);
             sp.direction = ['up','down','left','right'][Math.floor(Math.random()*4)];
             switch(sp.direction) {
                 case 'up': sp.x = Math.floor(Math.random()*arena.width)*arena.pixels;
