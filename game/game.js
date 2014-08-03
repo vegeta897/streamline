@@ -4,7 +4,7 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
 
     var now, dt = 0, last = 0, fps = 60, step = 1000/fps; // 60 FPS
     var game = { arena: { width: 200, height: 100, pixels: 6 },  objects: { streams: [] } };
-    game.secondsElapsed = game.frames = game.framesDropped = game.frameCount = 
+    game.secondsElapsed = game.frames = game.framesDropped = game.frameCount = game.localServerOffset =
         game.framesPerSecond = game.tickCount = game.ticksPerSecond = 0;
     var rendered = false;
 
@@ -28,7 +28,8 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
     var fireRef = new Firebase('https://streamline.firebaseio.com');
     fireRef.child('timestamps/'+timestampID).on('value', function(snap) {
         if(!snap.val()) { return; }
-        game.ticks = Math.floor((Date.now() - (localTime - snap.val()) - 1407106525000) / step);
+        game.localServerOffset = localTime - snap.val();
+        game.ticks = Math.floor(((Date.now() - game.localServerOffset) - 1407106525000) / step);
         last = performance.now();
         setInterval(tick,step);
         requestAnimationFrame(frame); // Request the next frame
