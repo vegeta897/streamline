@@ -2,16 +2,13 @@
 Application.Services.service('Game', function(Canvas) {
     console.log('game service initialized',performance.now());
 
+    var game = { arena: { width: 200, height: 100, pixels: 6 },  objects: { streams: [] } };
+    
     var myMessage = { text:'Unchanged' };
-    var secondsElapsed = 0;
-    var frameCount = 0, framesPerSecond = 0;
-    var tickCount = 0, ticksPerSecond = 0;
-    var myBox = { width: 20, height: 50, speed: 0.5, x: 50, y: 130 };
-    var boxTime = 0;
-    var ticks = 0;
-    var frames = 0;
+    game.secondsElapsed = game.boxTime = game.ticks = game.frames = game.framesDropped = game.frameCount = 
+        game.framesPerSecond = game.tickCount = game.ticksPerSecond = 0;
+    game.myBox = { width: 20, height: 50, speed: 0.5, x: 50, y: 130 };
     var rendered = false;
-    var framesDropped = 0;
     
     var now, dt = 0, last = performance.now(), step = 1000/60; // 60 FPS
     
@@ -20,58 +17,84 @@ Application.Services.service('Game', function(Canvas) {
     var tick = function() {
         now = performance.now(); dt += (now - last);
         if(dt > step) {
-            if(!rendered) { framesDropped++; } // If the last update wasn't rendered, we dropped a frame
-            while(dt >= step) { dt -= step; ticks++; update(step,dt,now); }
+            if(!rendered) { game.framesDropped++; } // If the last update wasn't rendered, we dropped a frame
+            while(dt >= step) { dt -= step; game.ticks++; update(step,dt,now); }
             rendered = false;
         }
         last = now;
     };
     setInterval(tick,step);
     var frame = function() {
-        frames++; frameCount++;
-        if(!rendered) { render(dt); rendered = true; } 
+        game.frames++; game.frameCount++;
+        if(!rendered) { Canvas.render(dt,game); rendered = true; } 
         requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame); // Request the next frame
 
     var update = function(step,dt,now) {
         var tickTime = performance.now();
-        if(secondsElapsed < Math.floor(tickTime / 1000)) {
-            secondsElapsed = Math.floor(tickTime / 1000);
-            framesPerSecond = frameCount;
-            frameCount = 0;
-            ticksPerSecond = tickCount;
-            tickCount = 0;
+        for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) { 
+            game.objects.streams[sp].frame(); 
+            if(game.objects.streams[sp].delete) { game.objects.streams.splice(sp,1); sp--; spl--; }
         }
-        tickCount++;
-        myBox.x += myBox.speed;
-        if(myBox.x == 1100) {
-            boxTime = now - boxStart - dt;
+        if(game.secondsElapsed < Math.floor(tickTime / 1000)) {
+            game.secondsElapsed = Math.floor(tickTime / 1000);
+            game.framesPerSecond = game.frameCount;
+            game.frameCount = 0;
+            game.ticksPerSecond = game.tickCount;
+            game.tickCount = 0;
+            game.objects.streams.push(new StreamPixel(null));
+        }
+        game.tickCount++;
+        game.myBox.x += game.myBox.speed;
+        if(game.myBox.x == 1100) {
+            game.boxTime = now - boxStart - dt;
             boxStart = now;
-            myBox.x = 50;
+            game.myBox.x = 50;
         }
     };
+    
+    function StreamPixel(properties) {
+        this.direction = Math.floor(Math.random()*4);
+        this.x = this.direction % 2 == 0 ? Math.floor(Math.random()*game.arena.width)*game.arena.pixels 
+            : this.direction == 1 ? 0 : game.arena.width*game.arena.pixels;
+        this.y = this.direction % 2 > 0 ? Math.floor(Math.random()*game.arena.height)*game.arena.pixels
+            : this.direction == 0 ? game.arena.height*game.arena.pixels : 0;
+        this.speed = 10;
+        this.frame = function() {
+            switch(this.direction) {
+                case 0: this.y -= this.speed/game.arena.pixels; break;
+                case 1: this.x += this.speed/game.arena.pixels; break;
+                case 2: this.y += this.speed/game.arena.pixels; break;
+                case 3: this.x -= this.speed/game.arena.pixels; break;
+            }
+            this.delete = this.x < -game.arena.pixels*this.speed || 
+                this.x > game.arena.width * game.arena.pixels + game.arena.pixels*this.speed
+                || this.y < -game.arena.pixels*this.speed || 
+                this.y > game.arena.height * game.arena.pixels + game.arena.pixels*this.speed || !this.y || !this.x;
+        };
+        
+        this.worth = 100;
+        if(!properties) { return; }
+        for(var key in properties) { if(!properties.hasOwnProperty(key)){return;}
+            this[key] = properties[key]; }
+    }
 
-    var mainCanvas = document.getElementById('mainCanvas');
-    var mainContext = mainCanvas.getContext ? mainCanvas.getContext('2d') : null;
-    var render = function(dt) {
-        mainContext.clearRect(0,0,mainCanvas.width,mainCanvas.height);
-        mainContext.fillStyle = 'white';
-        mainContext.font = '20px Arial';
-        mainContext.fillText('Seconds Elapsed: '+secondsElapsed,50,50);
-        mainContext.fillText('FPS: '+framesPerSecond,50,80);
-        mainContext.fillText('Tickrate: '+ticksPerSecond,50,100);
-        mainContext.fillRect(myBox.x,myBox.y,myBox.width,myBox.height);
-        mainContext.fillText('Box Reset Time Deviation: '+Math.floor(35000-boxTime)+'ms',50,220);
-        mainContext.fillText('Frames: '+frames,50,250);
-        mainContext.fillText('Ticks: '+ticks,50,280);
-        mainContext.fillText('Frames Dropped: '+framesDropped,50,310);
-    };
+    function Person(name) {
+        this.name = name;
+    }
 
-    requestAnimationFrame(tick); // start the first frame
+// the function person has a prototype property
+// we can add properties to this function prototype
+    Person.prototype.kind = 'person';
+
+// when we create a new object using new
+    var zack = new Person('Zack');
+    console.log(zack);
+    
     
     return { 
         message: myMessage,
-        secondsElapsed: secondsElapsed
+        game: game
     }
 });
