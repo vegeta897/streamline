@@ -23,8 +23,7 @@
         <p>Frames: <strong>{{ game.frames }}</strong></p>
         <p>Ticks: <strong>{{ game.ticks }}</strong></p>
         <p>Frames Dropped: <strong>{{ game.framesDropped }}</strong></p>
-        <p>Stream Pixels: <strong>{{ game.objects.streams.count || 'None' }}</strong></p>
-        <button ng-click="refresh()">Refresh</button>
+        <p>Stream Pixels: <strong>{{ game.objects.streams.length }}</strong></p>
     </section>
     <!-- JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
@@ -34,5 +33,6 @@
     <script src="canvas/canvas.js"></script>
     <script src="controls/controls.js"></script>
     <script src="game/game.js"></script>
+    <script src="game/objects.js"></script>
 </body>
 </html>
