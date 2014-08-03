@@ -58,7 +58,7 @@ Application.Services.service('Game', function(Canvas, $timeout) {
             case 'left': this.x = game.arena.width*game.arena.pixels;
                 this.y = Math.floor(Math.random()*game.arena.height)*game.arena.pixels; break;
         }
-        this.speed = 6;
+        this.speed = Math.floor(Math.random()*9 + 3);
         this.update = function() {
             this.x += DIR[this.direction][0] * this.speed/game.arena.pixels;
             this.y += DIR[this.direction][1] * this.speed/game.arena.pixels;
@@ -71,27 +71,27 @@ Application.Services.service('Game', function(Canvas, $timeout) {
             var interpolated = (this.speed/game.arena.pixels)*(rt/step);
             var drawX = this.x + DIR[this.direction][0]*interpolated;
             var drawY = this.y + DIR[this.direction][1]*interpolated;
-            //context.fillStyle = '#5e6380';
-            var tail = context.createLinearGradient(
+            var tail = this.speed * game.arena.pixels * 3;
+            var tailGrad = context.createLinearGradient(
                 DIR[this.direction][0] == 0 ? 0 
                     : drawX + game.arena.pixels/2 + 2 - (DIR[this.direction][0] < 0 ? 4 : 0),
                 DIR[this.direction][1] == 0 ? 0
                     : drawY + game.arena.pixels/2 + 2 - (DIR[this.direction][1] < 0 ? 4 : 0),
                 DIR[this.direction][0] == 0 ? 0
                     : (drawX + game.arena.pixels/2 + 2 - (DIR[this.direction][0] < 0 ? 4 : 0)) +
-                        (DIR[this.direction][0] == 0 ? -4 : DIR[this.direction][0]*-90),
+                        (DIR[this.direction][0] == 0 ? -4 : DIR[this.direction][0]*-tail),
                 DIR[this.direction][1] == 0 ? 0
                     : (drawY + game.arena.pixels/2 + 2 - (DIR[this.direction][1] < 0 ? 4 : 0)) +
-                        (DIR[this.direction][1] == 0 ? -4 : DIR[this.direction][1]*-90)
+                        (DIR[this.direction][1] == 0 ? -4 : DIR[this.direction][1]*-tail)
             );
-            tail.addColorStop(0,'rgba(166,172,194,0.3)');
-            tail.addColorStop(1,'rgba(166,172,194,0)');
-            context.fillStyle = tail;
+            tailGrad.addColorStop(0,'rgba(255,255,255,' + this.speed/12 * 0.3 + ')');
+            tailGrad.addColorStop(1,'rgba(255,255,255,0)');
+            context.fillStyle = tailGrad;
                 context.fillRect(drawX + game.arena.pixels/2 + 2 - (DIR[this.direction][0] < 0 ? 4 : 0),
                 drawY + game.arena.pixels/2 + 2 - (DIR[this.direction][1] < 0 ? 4 : 0),
-                DIR[this.direction][0] == 0 ? -4 : DIR[this.direction][0]*-90,
-                DIR[this.direction][1] == 0 ? -4 : DIR[this.direction][1]*-90);
-            context.fillStyle = '#a6acc2';
+                DIR[this.direction][0] == 0 ? -4 : DIR[this.direction][0]*-tail,
+                DIR[this.direction][1] == 0 ? -4 : DIR[this.direction][1]*-tail);
+            context.fillStyle = 'rgba(255,255,255,' + this.speed/12 + ')';
             context.fillRect(drawX-1+game.arena.pixels/2,drawY-1+game.arena.pixels/2,2,2);
         };
         this.worth = 100;
