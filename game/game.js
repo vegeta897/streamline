@@ -10,30 +10,26 @@ Application.Services.service('Game', function(Canvas) {
     var boxTime = 0;
     var ticks = 0;
     var frames = 0;
+    var rendered = false;
     
     var now, dt = 0, last = performance.now(), step = 1000/60;
     
     var appStart = last;
     var boxStart = last;
     
-    var frame = function() {
-        now = performance.now();
-        dt += (now - last);
-        if(dt > step) {
-            while(dt >= step) {
-                dt -= step;
-                update(step,dt);
-                ticks++;
-            }
-            render(dt);
-            frames++;
-            frameCount++;
-        }
-        last = now;
-        requestAnimationFrame(frame); // Request the next frame
+    var tick = function() {
+        now = performance.now(); dt += (now - last);
+        if(dt > step) { while(dt >= step) { dt -= step; update(step,dt,now); ticks++; } }
+        rendered = false; last = now;
     };
+    setInterval(tick,step);
+    var frame = function() {
+        if(!rendered) { render(dt); frames++; frameCount++; rendered = true; } 
+        requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame); // Request the next frame
 
-    var update = function(step,dt) {
+    var update = function(step,dt,now) {
         var tickTime = performance.now();
         if(secondsElapsed < Math.floor(tickTime / 1000)) {
             secondsElapsed = Math.floor(tickTime / 1000);
@@ -45,9 +41,8 @@ Application.Services.service('Game', function(Canvas) {
         tickCount++;
         myBox.x += myBox.speed;
         if(myBox.x == 1100) {
-            var finishTime = performance.now();
-            boxTime = finishTime - boxStart - dt;
-            boxStart = finishTime;
+            boxTime = now - boxStart - dt;
+            boxStart = now;
             myBox.x = 50;
         }
     };
@@ -68,7 +63,7 @@ Application.Services.service('Game', function(Canvas) {
         mainContext.fillText('Frames Dropped: '+(ticks-frames),50,310);
     };
 
-    requestAnimationFrame(frame); // start the first frame
+    requestAnimationFrame(tick); // start the first frame
     
     return { 
         message: myMessage,
