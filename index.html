@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html ng-app="application">
+<head>
+    <title>Streamline</title>
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700' rel='stylesheet' type='text/css'/>
+    <link href="css/layout.css" media="screen" rel="stylesheet"/>
+    <link href="css/theme.css" media="screen" rel="stylesheet"/>
+</head>
+<body>
+    <header>
+        <h1>Streamline</h1>
+    </header>
+    <section id="arena" ng-controller="Arena">
+        <canvas id="mainCanvas" width="1200" height="600">
+            Your browser doesn't support canvases. <a href="http://www.google.com/chrome">Get a better one.</a>
+        </canvas>
+        <p>{{ test.text }}</p>
+    </section>
+    <section id="controls" ng-controller="Controls">
+        <h2>Welcome to Streamline!</h2>
+        <p>{{ test.text }}</p>
+        <input type="text" ng-model="test.text" />
+        <button ng-click="changeMessage()">Change Message</button>
+    </section>
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
+    <script src="app/app.js"></script>
+    <script src="arena/arena.js"></script>
+    <script src="canvas/canvas.js"></script>
+    <script src="controls/controls.js"></script>
+    <script src="game/game.js"></script>
+</body>
+</html>

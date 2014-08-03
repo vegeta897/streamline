@@ -1,0 +1,9 @@
+body { background: #343635; color: #f2f5eb; font-family: "Roboto", Arial, sans-serif; font-size: 14px; }
+a { color: #d3d9b9; }
+
+/*noinspection ALL*/
+h1 { font-size: 3em; color: #d3d9b9; text-shadow: none; -webkit-text-fill-color: transparent;
+    background: -webkit-linear-gradient(left top, #f2f5eb, #d3d9b9);
+    background: -o-linear-gradient(transparent, transparent); -webkit-background-clip: text; }
+
+canvas#mainCanvas { background: url('../img/grid-dot.gif') #434767; }
