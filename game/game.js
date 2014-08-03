@@ -24,7 +24,6 @@ Application.Services.service('Game', function(Canvas) {
                 dt -= step;
                 update(step,dt);
                 ticks++;
-                if(ticks == 1200) { console.log(performance.now()-appStart); }
             }
             render(dt);
             frames++;
@@ -37,7 +36,6 @@ Application.Services.service('Game', function(Canvas) {
     var update = function(step,dt) {
         var tickTime = performance.now();
         if(secondsElapsed < Math.floor(tickTime / 1000)) {
-            console.log(tickTime,secondsElapsed,'seconds elapsed');
             secondsElapsed = Math.floor(tickTime / 1000);
             framesPerSecond = frameCount;
             frameCount = 0;
@@ -64,7 +62,7 @@ Application.Services.service('Game', function(Canvas) {
         mainContext.fillText('FPS: '+framesPerSecond,50,80);
         mainContext.fillText('Tickrate: '+ticksPerSecond,50,100);
         mainContext.fillRect(myBox.x,myBox.y,myBox.width,myBox.height);
-        mainContext.fillText('Box Reset Time: '+boxTime,50,220);
+        mainContext.fillText('Box Reset Time Deviation: '+Math.floor(35000-boxTime)+'ms',50,220);
         mainContext.fillText('Frames: '+frames,50,250);
         mainContext.fillText('Ticks: '+ticks,50,280);
         mainContext.fillText('Frames Dropped: '+(ticks-frames),50,310);

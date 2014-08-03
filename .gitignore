@@ -23,6 +23,7 @@ org.eclipse.*
 # IntelliJ
 .idea/workspace.xml 
 .idea/tasks.xml
+.idea/jsLibraryMappings.xml
 *.iws
 
 # Media
