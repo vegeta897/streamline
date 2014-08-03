@@ -24,7 +24,8 @@ Application.Services.service('Game', function(Canvas) {
     };
     setInterval(tick,step);
     var frame = function() {
-        if(!rendered) { render(dt); frames++; frameCount++; rendered = true; } 
+        frames++; frameCount++;
+        if(!rendered) { render(dt); rendered = true; } 
         requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame); // Request the next frame
