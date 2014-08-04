@@ -24,22 +24,32 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
         requestAnimationFrame(frame);
     };
     
-    var timestampID = Math.floor(Math.random()*99999);
-    var fireRef = new Firebase('https://streamline.firebaseio.com');
-    fireRef.child('timestamps/'+timestampID).on('value', function(snap) {
-        if(!snap.val()) { return; }
-        game.localServerOffset = localTime - snap.val();
-        game.ticks = Math.floor(((Date.now() - game.localServerOffset) - 1407106525000) / step);
+    setTimeout(function(){ // Wait a second for server time to sync
+        console.log(ServerDate.now());
+        console.log(Date.now());
+        game.localServerOffset = ServerDate.now() - Date.now();
+        game.ticks = Math.floor(((Date.now() - game.localServerOffset) - 1407107000000) / step);
         last = performance.now();
         setInterval(tick,step);
         requestAnimationFrame(frame); // Request the next frame
-        fireRef.child('timestamps/'+timestampID).set(null);
-    });
-    var localTime = Date.now();
-    fireRef.child('timestamps/'+timestampID).set(Firebase.ServerValue.TIMESTAMP);
+    },1000);
+
+//    var timestampID = Math.floor(Math.random()*99999);
+//    var fireRef = new Firebase('https://streamline.firebaseio.com');
+//    var init = fireRef.child('timestamps/'+timestampID).on('value', function(snap) {
+//        if(!snap.val()) { return; }
+//        game.localServerOffset = localTime - snap.val();
+//        game.ticks = Math.floor(((Date.now() - game.localServerOffset) - 1407106525000) / step);
+//        last = performance.now();
+//        setInterval(tick,step);
+//        requestAnimationFrame(frame); // Request the next frame
+//        fireRef.child('timestamps/'+timestampID).off('value',init);
+//        fireRef.child('timestamps/'+timestampID).set(null);
+//    });
+//    var localTime = Date.now();
+//    fireRef.child('timestamps/'+timestampID).set(Firebase.ServerValue.TIMESTAMP);
 
     var update = function(step,dt,now) {
-        var tickTime = performance.now();
         for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
             game.objects.streams[sp].update(); 
             if(game.objects.streams[sp].delete) { game.objects.streams.splice(sp,1); sp--; spl--; }
