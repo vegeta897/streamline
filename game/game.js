@@ -7,6 +7,7 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
     game.secondsElapsed = game.frames = game.framesDropped = game.frameCount = game.localServerOffset =
         game.framesPerSecond = game.tickCount = game.ticksPerSecond = 0;
     var rendered = false;
+    Canvas.setGridSize(game.arena.pixels);
 
     var tick = function() {
         now = performance.now(); dt += (now - last);
@@ -26,7 +27,7 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
     
     setTimeout(function(){ // Wait a second for server time to sync
         game.localServerOffset = document.domain == 'localhost' ? 9700 : ServerDate.now() - Date.now();
-        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1407107000000) / step);
+        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1407110000000) / step);
         last = performance.now();
         setInterval(tick,step);
         requestAnimationFrame(frame); // Request the next frame
@@ -52,6 +53,7 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
             game.objects.streams[sp].update(); 
             if(game.objects.streams[sp].delete) { game.objects.streams.splice(sp,1); sp--; spl--; }
         }
+        game.arena.cursor = Canvas.cursor;
         if(game.ticks % fps == 0) {
             game.secondsElapsed = game.ticks / fps;
             game.framesPerSecond = game.frameCount;

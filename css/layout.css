@@ -4,6 +4,9 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 body { width: 1202px; margin: 0 auto; }
 header { margin: 8px 0; }
 h1 { margin: 0; }
+section#arena { position: relative; }
+#highCanvas { position: absolute; top: 0; }
+section#arena p.coords { margin-right: 2px; float: right; text-align: right; }
 section#controls{ padding: 6px 0; }
 h2 { font-size: 1.5em; margin-bottom: 8px; }
 dl dt { line-height: 1.2em; }

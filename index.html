@@ -12,8 +12,12 @@
     </header>
     <section id="arena" ng-controller="Arena">
         <canvas id="mainCanvas" width="1200" height="600">
-            Your browser doesn't support canvases. <a href="http://www.google.com/chrome">Get a better one.</a>
+            Your browser is too old for this game. <a href="http://www.google.com/chrome">Time to upgrade.</a>
         </canvas>
+        <canvas id="highCanvas" width="1200" height="600"></canvas>
+        <p class="coords">
+            <strong>{{ game.arena.cursor.x }}</strong> , <strong>{{ game.arena.cursor.y }}</strong>
+        </p>
     </section>
     <section id="controls" ng-controller="Controls">
         <h2>Welcome to Streamline!</h2>
