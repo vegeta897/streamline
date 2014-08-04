@@ -37,7 +37,7 @@ Application.Services.factory('Objects', function() {
                 case 'left': sp.x = arena.width*arena.pixels;
                     sp.y = Math.floor(Math.random()*arena.height)*arena.pixels; break;
             }
-            sp.speed = Math.floor(Math.random()*9 + 3);
+            sp.speed = Math.floor(Math.random()*7 + 3);
             sp.worth = sp.speed * 10;
             sp.render = function(context,rt,step) {
                 var interpolated = (sp.speed/arena.pixels)*(rt/step);
@@ -56,14 +56,14 @@ Application.Services.factory('Objects', function() {
                         : (drawY + arena.pixels/2 + 2 - (DIR[sp.direction][1] < 0 ? 4 : 0)) +
                         (DIR[sp.direction][1] == 0 ? -4 : DIR[sp.direction][1]*-tail)
                 );
-                tailGrad.addColorStop(0,'rgba(255,255,255,' + sp.speed/12 * 0.3 + ')');
+                tailGrad.addColorStop(0,'rgba(255,255,255,' + sp.speed/10 * 0.3 + ')');
                 tailGrad.addColorStop(1,'rgba(255,255,255,0)');
                 context.fillStyle = tailGrad;
                 context.fillRect(drawX + arena.pixels/2 + 2 - (DIR[sp.direction][0] < 0 ? 4 : 0),
                     drawY + arena.pixels/2 + 2 - (DIR[sp.direction][1] < 0 ? 4 : 0),
                     DIR[sp.direction][0] == 0 ? -4 : DIR[sp.direction][0]*-tail,
                     DIR[sp.direction][1] == 0 ? -4 : DIR[sp.direction][1]*-tail);
-                context.fillStyle = 'rgba(255,255,255,' + sp.speed/12 + ')';
+                context.fillStyle = 'rgba(255,255,255,' + sp.speed/10 + ')';
                 context.fillRect(drawX-1+arena.pixels/2,drawY-1+arena.pixels/2,2,2);
             };
             return sp;
