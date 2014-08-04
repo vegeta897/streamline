@@ -20,16 +20,24 @@
         </p>
     </section>
     <section id="controls" ng-controller="Controls">
-        <h2>Welcome to Streamline!</h2>
-        <dl>
-            <dt>Game-Seconds Elapsed: <strong>{{ game.secondsElapsed }}</strong></dt>
-            <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
-            <dt>Frame Count: <strong>{{ game.frames }}</strong></dt>
-            <dt>Frames Dropped: <strong>{{ game.framesDropped }}</strong></dt>
-            <dt>Global Tick: <strong>{{ game.ticks }}</strong></dt>
-            <dt>Local/Server Offset: <strong>{{ game.localServerOffset }}</strong> ms</dt>
-            <dt>Stream Pixels: <strong>{{ game.objects.streams.length }}</strong></dt>
-        </dl>
+        <section>
+            <h2>Welcome to Streamline!</h2>
+            <dl>
+                <dt>Game-Seconds Elapsed: <strong>{{ game.secondsElapsed }}</strong></dt>
+                <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
+                <dt>Frame Count: <strong>{{ game.frames }}</strong></dt>
+                <dt>Frames Dropped: <strong>{{ game.framesDropped }}</strong></dt>
+                <dt>Global Tick: <strong>{{ game.ticks }}</strong></dt>
+                <dt>Local/Server Offset: <strong>{{ game.localServerOffset }}</strong> ms</dt>
+                <dt>Stream Pixels: <strong>{{ game.objects.streams.length }}</strong></dt>
+            </dl>
+        </section>
+        <section>
+            <button ng-click="buildGate('left')">Left Gate</button>
+            <button ng-click="buildGate('down')">Down Gate</button>
+            <button ng-click="buildGate('up')">Up Gate</button>
+            <button ng-click="buildGate('right')">Right Gate</button>
+        </section>
     </section>
     <SCRIPT src="PHP/ServerDate.php"></SCRIPT>
     <!-- JS -->

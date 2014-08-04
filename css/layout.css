@@ -7,6 +7,8 @@ h1 { margin: 0; }
 section#arena { position: relative; }
 #highCanvas { position: absolute; top: 0; }
 section#arena p.coords { margin-right: 2px; float: right; text-align: right; }
-section#controls{ padding: 6px 0; }
+section#controls { padding: 6px 0; }
+section#controls>section { float: left; }
+section#controls>section:first-child { width: 300px; }
 h2 { font-size: 1.5em; margin-bottom: 8px; }
 dl dt { line-height: 1.2em; }
