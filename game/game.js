@@ -28,7 +28,7 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
         console.log(ServerDate.now());
         console.log(Date.now());
         game.localServerOffset = ServerDate.now() - Date.now();
-        game.ticks = Math.floor(((Date.now() - game.localServerOffset) - 1407107000000) / step);
+        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1407107000000) / step);
         last = performance.now();
         setInterval(tick,step);
         requestAnimationFrame(frame); // Request the next frame
