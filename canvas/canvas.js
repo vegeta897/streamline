@@ -19,8 +19,8 @@ Application.Services.service('Canvas', function() {
             requestAnimationFrame(function(){
                 highContext.clearRect(0,0,highCanvas.width,highCanvas.height);
                 highContext.fillStyle = 'rgba(255,255,255,0.08)';
-                highContext.fillRect(0,y*gridSize,highCanvas.width,gridSize);
-                highContext.fillRect(x*gridSize,0,gridSize,highCanvas.height);
+                highContext.fillRect(0,y*gridSize+0.5,highCanvas.width,gridSize-1);
+                highContext.fillRect(x*gridSize+0.5,0,gridSize-1,highCanvas.height);
                 highContext.fillStyle = 'rgba(255,255,255,0.3)';
                 highContext.fillRect(x*gridSize-1,y*gridSize-1,gridSize+2,gridSize+2);
                 highContext.clearRect(x*gridSize-1,y*gridSize+2,gridSize+2,gridSize-4);
@@ -36,13 +36,25 @@ Application.Services.service('Canvas', function() {
             highContext.clearRect(0,0,highCanvas.width,highCanvas.height);
         });
     };
-        
+    
     return {
         render: function(rt,game,step) {
             mainContext.clearRect(0,0,mainCanvas.width,mainCanvas.height);
             mainContext.fillStyle = 'white';
-            for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) { 
+            for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
                 game.objects.streams[sp].render(mainContext,rt,step); }
+            for(var c = 0, cl = game.objects.collisions.length; c < cl; c++) {
+                var thisC = game.objects.collisions[c];
+                var age = Math.min(30,game.ticks - thisC.tick);
+                var colGrad = mainContext.createRadialGradient(
+                    thisC.x + game.arena.pixels/2, thisC.y + game.arena.pixels/2, 0,
+                    thisC.x + game.arena.pixels/2, thisC.y + game.arena.pixels/2, 12
+                );
+                colGrad.addColorStop(0,'rgba(255,255,255,' + (0.8 * (thisC.intensity/10) * (30-age)/30) + ')');
+                colGrad.addColorStop((30-age)/30,'rgba(255,255,255,0)');
+                mainContext.fillStyle = colGrad;
+                mainContext.fillRect(thisC.x + game.arena.pixels/2 - 12, thisC.y + game.arena.pixels/2 - 12,24, 24);
+            }
         },
         cursor: cursor,
         setGridSize: function(pixels) { gridSize = pixels;

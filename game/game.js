@@ -3,7 +3,7 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
     console.log('game service initialized',performance.now());
 
     var now, dt = 0, last = 0, fps = 60, step = 1000/fps; // 60 FPS
-    var game = { arena: { width: 200, height: 100, pixels: 6 },  objects: { streams: [] } };
+    var game = { arena: { width: 200, height: 100, pixels: 6 },  objects: { streams: [], collisions: [] } };
     game.secondsElapsed = game.frames = game.framesDropped = game.frameCount = game.localServerOffset =
         game.framesPerSecond = game.tickCount = game.ticksPerSecond = 0;
     var rendered = false;
@@ -49,12 +49,28 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
 //    fireRef.child('timestamps/'+timestampID).set(Firebase.ServerValue.TIMESTAMP);
 
     var update = function(step,dt,now) {
+        var collision = {};
         for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
-            game.objects.streams[sp].update(); 
-            if(game.objects.streams[sp].delete) { game.objects.streams.splice(sp,1); sp--; spl--; }
+            var thisSP = game.objects.streams[sp];
+            var spGrid = Math.round(thisSP.x/game.arena.pixels)+':'+Math.round(thisSP.y/game.arena.pixels);
+            if(collision.hasOwnProperty(spGrid)) {
+                if(!collision[spGrid].collision && !thisSP.collision) {
+                    game.objects.collisions.push({ x: thisSP.x, y: thisSP.y, tick: game.ticks, 
+                        intensity: (thisSP.speed + collision[spGrid].speed) / 2, type: 'stream' });
+                    collision[spGrid].collision = thisSP.collision = true;
+                }
+            } else { thisSP.collision = false; collision[spGrid] = thisSP; }
+            thisSP.update();
+            if(thisSP.delete) { game.objects.streams.splice(sp,1); sp--; spl--; }
         }
+
+        for(var c = 0, cl = game.objects.collisions.length; c < cl; c++) {
+            var thisC = game.objects.collisions[c];
+            if(game.ticks - thisC.tick > 30) { game.objects.collisions.splice(c,1); c--; cl--; }
+        }
+        
         game.arena.cursor = Canvas.cursor;
-        if(game.ticks % fps == 0) {
+        if(game.ticks % fps == 0) { // Every game second
             game.secondsElapsed = game.ticks / fps;
             game.framesPerSecond = game.frameCount;
             game.ticksPerSecond = game.tickCount;

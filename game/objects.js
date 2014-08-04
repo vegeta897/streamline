@@ -43,6 +43,7 @@ Application.Services.factory('Objects', function() {
                 var interpolated = (sp.speed/arena.pixels)*(rt/step);
                 var drawX = sp.x + DIR[sp.direction][0]*interpolated;
                 var drawY = sp.y + DIR[sp.direction][1]*interpolated;
+                
                 var tail = sp.speed * arena.pixels * 3;
                 var tailGrad = context.createLinearGradient(
                     DIR[sp.direction][0] == 0 ? 0
@@ -57,6 +58,8 @@ Application.Services.factory('Objects', function() {
                         (DIR[sp.direction][1] == 0 ? -4 : DIR[sp.direction][1]*-tail)
                 );
                 tailGrad.addColorStop(0,'rgba(255,255,255,' + sp.speed/10 * 0.3 + ')');
+                tailGrad.addColorStop(0.2,'rgba(255,255,255,' + sp.speed/10 * 0.15 + ')');
+                tailGrad.addColorStop(0.4,'rgba(255,255,255,' + sp.speed/10 * 0.05 + ')');
                 tailGrad.addColorStop(1,'rgba(255,255,255,0)');
                 context.fillStyle = tailGrad;
                 context.fillRect(drawX + arena.pixels/2 + 2 - (DIR[sp.direction][0] < 0 ? 4 : 0),
