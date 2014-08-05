@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="application" ng-cloak>
+<html ng-app="application">
 <head>
     <title>Streamline</title>
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700' rel='stylesheet' type='text/css'/>
@@ -10,7 +10,7 @@
     <header>
         <h1>Streamline</h1>
     </header>
-    <section id="arena" ng-controller="Arena">
+    <section id="arena" ng-controller="Arena" ng-cloak>
         <canvas id="mainCanvas" width="1200" height="600">
             Your browser is too old for this game. <a href="http://www.google.com/chrome">Time to upgrade.</a>
         </canvas>
@@ -19,7 +19,7 @@
             <strong>{{ game.arena.cursor.x }}</strong> , <strong>{{ game.arena.cursor.y }}</strong>
         </p>
     </section>
-    <section id="controls" ng-controller="Controls">
+    <section id="controls" ng-controller="Controls" ng-cloak>
         <section>
             <h2>Welcome to Streamline!</h2>
             <dl>
@@ -39,7 +39,7 @@
             <button ng-click="buildGate('right')">Right Gate</button>
         </section>
     </section>
-    <SCRIPT src="PHP/ServerDate.php"></SCRIPT>
+    <script src="PHP/ServerDate.php"></script> <!-- For syncing local time -->
     <!-- JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
