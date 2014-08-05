@@ -5,7 +5,7 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
     var now, dt = 0, last = 0, fps = 60, step = 1000/fps; // 60 FPS
     var game = { 
         arena: { width: 200, height: 100, pixels: 6 },  
-        objects: { streams: [], streamX: {}, streamY: {}, collisions: [], gates: {} },
+        objects: { streams: [], streamX: {}, streamY: {}, collisions: [], gates: {}, gateX: {}, gateY: {} },
         player: {  }
     };
     game.secondsElapsed = game.frames = game.framesDropped = game.frameCount = game.localServerOffset =
@@ -45,16 +45,18 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
     game.objects.gates['115:65'] = Objects.RedirGateRight(game.arena,115,65);
 
     var update = function(step,dt,now) {
-        game.objects.streamX = {}; game.objects.streamY = {};
+        game.objects.streamX = {}; game.objects.streamY = {}; game.objects.gateX = {}; game.objects.gateY = {};
         var collision = {};
         for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
             var thisSP = game.objects.streams[sp];
             var spGrid = Math.round(thisSP.x/game.arena.pixels)+':'+Math.round(thisSP.y/game.arena.pixels);
             if(collision.hasOwnProperty(spGrid)) {
-                if(!collision[spGrid].collision && !thisSP.collision) {
+                var collidedSP = collision[spGrid];
+                if(!collidedSP.collision && !thisSP.collision
+                    && Math.abs(collidedSP.x - thisSP.x) <= 2 && Math.abs(collidedSP.y - thisSP.y) <= 2) {
                     game.objects.collisions.push({ x: thisSP.x, y: thisSP.y, tick: game.ticks, 
-                        intensity: (thisSP.speed + collision[spGrid].speed) / 2, type: 'stream' });
-                    collision[spGrid].collision = thisSP.collision = true;
+                        intensity: (thisSP.speed + collidedSP.speed) / 2, type: 'stream' });
+                    collidedSP.collision = thisSP.collision = true;
                 }
             } else { thisSP.collision = false; collision[spGrid] = thisSP; }
             thisSP.update(game);
@@ -67,7 +69,7 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
         }
         
         for(var gk in game.objects.gates) { if(!game.objects.gates.hasOwnProperty(gk)) { continue; }
-            game.objects.gates[gk].update(game.objects.streams);
+            game.objects.gates[gk].update(game);
         }
         
         game.arena.cursor = Canvas.cursor;
@@ -76,11 +78,14 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
             game.framesPerSecond = game.frameCount;
             game.ticksPerSecond = game.tickCount;
             game.tickCount = game.frameCount = 0;
-            game.objects.streams.push(Objects.StreamPixel(game.arena,game.ticks));
         }
         if(game.ticks % 5 == 0) { // Every 5 frames
         }
         if(game.ticks % 10 == 0) { // Every 10 frames
+            Math.seedrandom(game.ticks);
+            if(Math.random() > 0.8) {
+                game.objects.streams.push(Objects.StreamPixel(game.arena));
+            }
         }
         game.tickCount++;
     };

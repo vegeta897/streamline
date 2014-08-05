@@ -5,7 +5,8 @@ body { width: 1202px; margin: 0 auto; }
 header { margin: 8px 0; }
 h1 { margin: 0; }
 section#arena { position: relative; }
-#highCanvas { position: absolute; top: 0; }
+canvas#mainCanvas { border: 1px solid; }
+canvas#highCanvas { position: absolute; top: 1px; left: 1px; }
 section#arena p.coords { margin-right: 2px; float: right; text-align: right; }
 section#controls { padding: 6px 0; }
 section#controls>section { float: left; }
