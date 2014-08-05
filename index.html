@@ -22,6 +22,9 @@
     <section id="controls" ng-controller="Controls" ng-cloak>
         <section>
             <h2>Welcome to Streamline!</h2>
+            <button ng-hide="game.paused" ng-click="pause()">Pause</button>
+            <button ng-show="game.paused" ng-click="resume()">Resume</button>
+            <button ng-show="game.paused" ng-click="oneFrame()">1 Frame</button>
             <dl>
                 <dt>Game-Seconds Elapsed: <strong>{{ game.secondsElapsed }}</strong></dt>
                 <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
@@ -33,10 +36,10 @@
             </dl>
         </section>
         <section>
-            <button ng-click="buildGate('left')">Left Gate</button>
-            <button ng-click="buildGate('down')">Down Gate</button>
-            <button ng-click="buildGate('up')">Up Gate</button>
-            <button ng-click="buildGate('right')">Right Gate</button>
+            <button ng-disabled="true" ng-click="buildGate('left')">Left Gate</button>
+            <button ng-disabled="true" ng-click="buildGate('down')">Down Gate</button>
+            <button ng-disabled="true" ng-click="buildGate('up')">Up Gate</button>
+            <button ng-disabled="true" ng-click="buildGate('right')">Right Gate</button>
         </section>
     </section>
     <script src="PHP/ServerDate.php"></script> <!-- For syncing local time -->

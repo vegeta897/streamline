@@ -6,4 +6,7 @@ Application.Controllers.controller('Controls', function($scope, Game) {
         console.log('gate',gateType,'selected for building');
         Game.game.player.building = gateType;
     };
+    $scope.pause = Game.pause;
+    $scope.resume = Game.resume;
+    $scope.oneFrame = Game.oneFrame;
 });

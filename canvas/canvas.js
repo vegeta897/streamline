@@ -20,12 +20,12 @@ Application.Services.service('Canvas', function() {
     var onMouseOut = function() { cursor.x = cursor.y = '-'; };
     
     return {
-        render: function(rt,game,step) {
+        render: function(rt,game,step,tick) {
             mainContext.clearRect(0,0,mainCanvas.width,mainCanvas.height);
             mainContext.fillStyle = 'white';
             // Render streams
             for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
-                game.objects.streams[sp].render(mainContext,rt,step); }
+                game.objects.streams[sp].render(mainContext,rt,step,tick); }
             // Render gates
             for(var gk in game.objects.gates) { if(!game.objects.gates.hasOwnProperty(gk)) { continue; }
                 game.objects.gates[gk].render(mainContext);
@@ -70,8 +70,8 @@ Application.Services.service('Canvas', function() {
                 if(gates.hasOwnProperty(coord)) {
                     for(var g = 0, gl = gates[coord].length; g < gl; g++) {
                         var gate = gates[coord][g];
-                        highContext.fillRect(gate.cx - 1, gate.cy - 1, gridSize + 2, gridSize + 2);
-                        highContext.clearRect(gate.cx, gate.cy, gridSize, gridSize);
+                        highContext.fillRect(gate.x - 1, gate.y - 1, gridSize + 2, gridSize + 2);
+                        highContext.clearRect(gate.x, gate.y, gridSize, gridSize);
                     }
                 }
             };
@@ -80,6 +80,21 @@ Application.Services.service('Canvas', function() {
         },
         cursor: cursor,
         setGridSize: function(pixels,theGame) { gridSize = pixels; game = theGame;
-            jQuery(highCanvas).mousemove(onMouseMove).mouseleave(onMouseOut); }
+            jQuery(highCanvas).mousemove(onMouseMove).mouseleave(onMouseOut); },
+        getLineRectangle: function(start,end,expand) {
+            if(start.x > end.x) { // Right to left
+                return { x: start.x + expand, y: start.y - expand, 
+                    width: (end.x - expand) - (start.x + expand), height: expand * 2 }
+            } else if(start.x < end.x) { // Left to right
+                return { x: start.x - expand, y: start.y - expand,
+                    width: (end.x + expand) - (start.x - expand), height: expand * 2 }
+            } else if(start.y > end.y) { // Down to up
+                return { x: start.x - expand, y: start.y + expand,
+                    width: expand * 2, height: (end.y - expand) - (start.y + expand) }
+            } else { // Up to down
+                return { x: start.x - expand, y: start.y - expand,
+                    width: expand * 2, height: (end.y + expand) - (start.y - expand) }
+            }
+        }
     }
 });

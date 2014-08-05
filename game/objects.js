@@ -1,16 +1,13 @@
 'use strict';
-Application.Services.factory('Objects', function(Utility) {
+Application.Services.factory('Objects', function(Utility, Canvas) {
     var DIR = { up: {x:0,y:-1}, down: {x:0,y:1}, left: {x:-1,y:0}, right: {x:1,y:0} };
     
     function Movable(arena) { // Prototype for movable object
         this.speed = this.x = this.y = 0;
         this.direction = 'up';
         this.render = function(context,rt,step) {
-            var interpolated = (this.speed/arena.pixels)*(rt/step);
-            var drawX = this.x + DIR[this.direction].x*interpolated;
-            var drawY = this.y + DIR[this.direction].y*interpolated;
             context.fillStyle = 'blue';
-            context.fillRect(drawX-1+arena.pixels/2,drawY-1+arena.pixels/2,2,2)
+            context.fillRect(this.x-1+arena.pixels/2,this.y-1+arena.pixels/2,2,2)
         };
         this.move = function() {
             this.x += DIR[this.direction].x * this.speed/arena.pixels;
@@ -28,7 +25,7 @@ Application.Services.factory('Objects', function(Utility) {
     function Gate(game,x,y) { // Prototype for gate
         this.gameX = x; this.gameY = y; this.name = 'Generic Gate';
         this.x = x * game.arena.pixels; this.y = y * game.arena.pixels;
-        this.cost = 50;
+        this.cost = 50; this.recent = [];
         game.objects.gates[this.gameX+':'+this.gameY] = this;
         game.objects.gateX[this.gameX] = game.objects.gateX.hasOwnProperty(this.gameX) ?
             game.objects.gateX[this.gameX].concat([this]) : [this];
@@ -38,20 +35,12 @@ Application.Services.factory('Objects', function(Utility) {
             context.fillStyle = 'red';
             context.fillRect(this.x, this.y, game.arena.pixels, game.arena.pixels);
         };
-        this.getStreams = function(stream) {
-            var streams = [];
-            for(var s = 0, sl = stream.length; s < sl; s++) {
-                var thisSP = stream[s];
-                if(this.gameX == Math.round(thisSP.x/game.arena.pixels) 
-                    && this.gameY == Math.round(thisSP.y/game.arena.pixels)) {
-                    streams.push(thisSP);
+        this.update = function(game) {
+            for(var r = 0, rl = this.recent.length; r < rl; r++) {
+                if(game.ticks > this.recent[r] + 240) {
+                    this.recent.splice(r,1); r--; rl--;
                 }
             }
-            return streams;
-        };
-        this.update = function(game) {
-            var streams = this.getStreams(game.objects.streams);
-            if(streams.length > 0) {}
         };
     }
     
@@ -61,21 +50,14 @@ Application.Services.factory('Objects', function(Utility) {
         g.init = function() { g.name = Utility.capitalize(g.direction) + ' Redirection Gate'; };
         g.outX = 0; g.outY = -game.arena.pixels; // Where pixels are output
         g.cost = 100;
-        g.update = function() {
-//            var streams = this.getStreams(game.objects.streams);
-//            for(var s = 0, sl = streams.length; s < sl; s++) {
-//                streams[s].x = g.x + g.outX; streams[s].y = g.y + g.outY;
-//                streams[s].direction = g.direction;
-//            }
-        };
         g.render = function(context) {
-            context.fillStyle = '#202048';
+            context.fillStyle = 'rgb(' + Math.min(255,(32 + g.recent.length*6)) + ',32,72)';
             context.fillRect(g.x, g.y, game.arena.pixels, game.arena.pixels);
             context.clearRect(g.x + g.outX*2 + game.arena.pixels/2 - 2 - g.outX,
                 g.y + g.outY*2 + game.arena.pixels/2 - 2 - g.outY, 4, 4);
             context.fillStyle = 'white';
-            context.fillRect(g.x + g.outX*2 + game.arena.pixels/2 - 1 - g.outX, 
-                g.y + g.outY*2 + game.arena.pixels/2 - 1 - g.outY, 2, 2);
+            var rect = Canvas.getLineRectangle({x:g.x+g.outX,y:g.y+g.outY},{x:g.x+g.outX*2,y:g.y+g.outY*2},1);
+            context.fillRect(rect.x+game.arena.pixels/2,rect.y+game.arena.pixels/2,rect.width,rect.height);
         };
         return g;
     }
@@ -83,85 +65,116 @@ Application.Services.factory('Objects', function(Utility) {
     return {
         StreamPixel: function(arena) {
             var sp = new Movable(arena);
-            var minSpeed = 3, maxSpeed = 9;
+            var minSpeed = 3, maxSpeed = 9, glowMin = 8;
             sp.speed = Utility.randomInt(minSpeed,maxSpeed);
-            var glowSize = sp.speed * 7; // Size of glowing aura around pixel
             sp.direction = ['up','up','down','down','left','right'][Math.floor(Math.random()*6)];
+            //sp.direction = 'right';
             switch(sp.direction) {
                 case 'up': sp.x = Math.floor(Math.random()*arena.width)*arena.pixels;
-                    sp.y = arena.height*arena.pixels + glowSize; break;
-                case 'right': sp.x = -glowSize;
+                    sp.y = arena.height*arena.pixels + sp.speed * glowMin + sp.speed; break;
+                case 'right': sp.x = -sp.speed * glowMin + sp.speed;
                     sp.y = Math.floor(Math.random()*arena.height)*arena.pixels; break;
                 case 'down': sp.x = Math.floor(Math.random()*arena.width)*arena.pixels;
-                    sp.y = -glowSize; break;
-                case 'left': sp.x = arena.width*arena.pixels + glowSize;
+                    sp.y = -sp.speed * glowMin + sp.speed; break;
+                case 'left': sp.x = arena.width*arena.pixels + sp.speed * glowMin + sp.speed;
                     sp.y = Math.floor(Math.random()*arena.height)*arena.pixels; break;
             }
+            //sp.y = 300;
             sp.worth = sp.speed * 10;
-            sp.render = function(context,rt,step) {
-                var interpolated = (sp.speed/arena.pixels)*(rt/step);
-                var drawX = sp.x + DIR[sp.direction].x*interpolated;
-                var drawY = sp.y + DIR[sp.direction].y*interpolated;
-                var tail = sp.speed * arena.pixels * 3;
-                var tailGrad = context.createLinearGradient(
-                    DIR[sp.direction].x == 0 ? 0
-                        : drawX + arena.pixels/2 + 2 - (DIR[sp.direction].x < 0 ? 4 : 0),
-                    DIR[sp.direction].y == 0 ? 0
-                        : drawY + arena.pixels/2 + 2 - (DIR[sp.direction].y < 0 ? 4 : 0),
-                    DIR[sp.direction].x == 0 ? 0
-                        : (drawX + arena.pixels/2 + 2 - (DIR[sp.direction].x < 0 ? 4 : 0)) +
-                        (DIR[sp.direction][0] == 0 ? -4 : DIR[sp.direction].x*-tail),
-                    DIR[sp.direction].y == 0 ? 0
-                        : (drawY + arena.pixels/2 + 2 - (DIR[sp.direction].y < 0 ? 4 : 0)) +
-                        (DIR[sp.direction].y == 0 ? -4 : DIR[sp.direction].y*-tail)
-                );
-                tailGrad.addColorStop(0,'rgba(255,255,255,' + sp.speed/maxSpeed * 0.3 + ')');
-                tailGrad.addColorStop(0.2,'rgba(255,255,255,' + sp.speed/maxSpeed * 0.15 + ')');
-                tailGrad.addColorStop(0.4,'rgba(255,255,255,' + sp.speed/maxSpeed * 0.05 + ')');
-                tailGrad.addColorStop(1,'rgba(255,255,255,0)');
-                context.fillStyle = tailGrad;
-                context.fillRect(drawX + arena.pixels/2 + 2 - (DIR[sp.direction].x < 0 ? 4 : 0),
-                    drawY + arena.pixels/2 + 2 - (DIR[sp.direction].y < 0 ? 4 : 0),
-                    DIR[sp.direction].x == 0 ? -4 : DIR[sp.direction].x*-tail,
-                    DIR[sp.direction].y == 0 ? -4 : DIR[sp.direction].y*-tail);
-                context.fillStyle = 'rgba(255,255,255,' + sp.speed/maxSpeed + ')';
-                context.fillRect(drawX-1+arena.pixels/2,drawY-1+arena.pixels/2,2,2);
-                var glow = context.createRadialGradient(
-                    drawX + arena.pixels/2, drawY + arena.pixels/2, 0,
-                    drawX + arena.pixels/2, drawY + arena.pixels/2, glowSize
-                );
-                glow.addColorStop(0,'rgba(255,255,255,' + (0.04 * (sp.speed/maxSpeed)) + ')');
-                glow.addColorStop(1,'rgba(255,255,255,0)');
-                context.fillStyle = glow;
-                context.fillRect(drawX + arena.pixels/2 - glowSize, drawY + arena.pixels/2 - glowSize, 
-                    glowSize*2, glowSize*2);
-            };
+            sp.gates = [];
+            var tailLength = function() { return sp.speed * 60 / 4; };
             sp.update = function(game) {
                 sp.move();
-                var gameX = Math.round(sp.x/arena.pixels); var gameY = Math.round(sp.y/arena.pixels);
-                var grid = gameX+':'+gameY; var gates, reach, axis;
+                var gameX = Math.round(sp.x/arena.pixels), gameY = Math.round(sp.y/arena.pixels);
+                var lineGates, reach, axis;
                 if(sp.direction == 'up' || sp.direction == 'down') {
-                    gates = game.objects.gateX[gameX] || []; axis = 'y';
+                    lineGates = game.objects.gateX[gameX] || []; axis = 'y';
                     reach = sp.direction == 'up' ? sp.y - sp.speed/arena.pixels
                         : sp.y + sp.speed/arena.pixels;
                     game.objects.streamX[gameX] = game.objects.streamX.hasOwnProperty(gameX) ?
-                        game.objects.streamX[gameX].concat([sp]) : [sp];               
+                        game.objects.streamX[gameX].concat([sp]) : [sp];
                 } else {
-                    gates = game.objects.gateY[gameY] || []; axis = 'x';
+                    lineGates = game.objects.gateY[gameY] || []; axis = 'x';
                     reach = sp.direction == 'left' ? sp.x - sp.speed/arena.pixels
                         : sp.x + sp.speed/arena.pixels;
                     game.objects.streamY[gameY] = game.objects.streamY.hasOwnProperty(gameY) ?
                         game.objects.streamY[gameY].concat([sp]) : [sp];
                 }
-                if(sp.speed > 60) { return; } // Go through gates if going too fast
-                for(var g = 0, gl = gates.length; g < gl; g++) {
-                    if(Utility.isBetweenSoftUpper(gates[g][axis],sp[axis],reach)) {
-                        /** collision! */
-                        sp.x = gates[g].x + gates[g].outX; sp.y = gates[g].y + gates[g].outY;
-                        sp.direction = gates[g].direction;
-                        sp.speed += 1;
+                for(var lg = 0, lgl = sp.speed > 50 ? 0 : lineGates.length; lg < lgl; lg++) {
+                    if(Utility.isBetweenSoftUpper(lineGates[lg][axis],sp[axis],reach)) {
+                        sp.x = lineGates[lg].x + lineGates[lg].outX; sp.y = lineGates[lg].y + lineGates[lg].outY;
+                        lineGates[lg].recent.push(game.ticks);
+                        sp.gates.push({ x: lineGates[lg].x, y: lineGates[lg].y, lastDir: sp.direction, 
+                            speed: sp.speed, tick: game.ticks });
+                        sp.direction = lineGates[lg].direction;
+                        sp.speed *= 1.2;
                     }
                 }
+                if(sp.gates.length > 0) { // If there is at least one gate in tail...
+                    sp.gates[sp.gates.length-1].dist = // Update the latest gate's distance
+                        Math.abs((sp.x - sp.gates[sp.gates.length-1].x) + (sp.y - sp.gates[sp.gates.length-1].y)) }
+                for(var g = sp.gates.length - 1; g >= 0; g--) { // Trim gate list based on age
+                    if(game.ticks > sp.gates[g].tick + game.fps * 1.5) { sp.gates.splice(g,1); }
+                }
+            };
+            sp.render = function(context,rt,step,tick) {
+                // Render tail
+                for(var ts = sp.gates.length; ts >= 0; ts--) {
+                    var start, end, ticksRemain, gradStart, gradEnd, portion;
+                    if(ts == sp.gates.length) { // From the pixel
+                        start = gradStart = { x: sp.x, y: sp.y };
+                    } else { // From a gate
+                        ticksRemain = 90-(tick-sp.gates[ts].tick);
+                        portion = ticksRemain/90;
+                        start = { x: sp.gates[ts].x, y: sp.gates[ts].y };
+                        gradStart = { 
+                            x: start.x + DIR[sp.gates[ts].lastDir].x*(1-portion)*sp.gates[ts].speed*15,
+                            y: start.y + DIR[sp.gates[ts].lastDir].y*(1-portion)*sp.gates[ts].speed*15 };
+                    }
+                    if(sp.gates.length == 0) { // No gates in tail?
+                        end = { x: sp.x - DIR[sp.direction].x*tailLength(),
+                            y: sp.y - DIR[sp.direction].y*tailLength() };
+                        gradEnd = end;
+                    } else if(ts < 1) { // Last gate
+                        ticksRemain = 90-(tick-sp.gates[ts].tick);
+                        portion = ticksRemain/90;
+                        var tailRemain = portion * sp.gates[ts].speed * 15;
+                        end = { x: start.x - DIR[sp.gates[ts].lastDir].x*tailRemain,
+                            y: start.y - DIR[sp.gates[ts].lastDir].y*tailRemain };
+                        gradEnd = end;
+                    } else { // Connect to next gate
+                        end = { x: sp.gates[ts-1].x, y: sp.gates[ts-1].y };
+                        var thisSpeed = ts == sp.gates.length ? sp.speed: sp.gates[ts].speed, 
+                            thisDir = ts == sp.gates.length ? sp.direction : sp.gates[ts].lastDir;
+                        gradEnd = { x: gradStart.x - DIR[thisDir].x*thisSpeed*15, 
+                            y: gradStart.y - DIR[thisDir].y*thisSpeed*15 };
+                    }
+                    var tailGrad = context.createLinearGradient(gradStart.x,gradStart.y,gradEnd.x,gradEnd.y);
+                    tailGrad.addColorStop(0,'rgba(255,255,255,' + Math.min(0.8,sp.speed/maxSpeed * 0.412) + ')');
+                    tailGrad.addColorStop(0.2,'rgba(255,255,255,' + Math.min(0.4,sp.speed/maxSpeed * 0.206) + ')');
+                    tailGrad.addColorStop(0.4,'rgba(255,255,255,' + Math.min(0.2,sp.speed/maxSpeed * 0.103) + ')');
+                    tailGrad.addColorStop(1,'rgba(255,255,255,0)');
+                    context.fillStyle = tailGrad;//'rgba(255,255,255,0.1)';
+                    var tailRect = Canvas.getLineRectangle(start,end,1.5);
+                    context.fillRect(tailRect.x + arena.pixels/2, tailRect.y + arena.pixels/2,
+                        tailRect.width, tailRect.height);
+                }
+                // Render pixel
+                context.fillStyle = 'rgba(255,255,255,' + sp.speed/maxSpeed + ')';
+                context.fillRect(sp.x-1+arena.pixels/2,sp.y-1+arena.pixels/2,2,2);
+                // Render glowing aura
+                var glowSize = glowMin + sp.speed;
+                var glow = context.createRadialGradient(
+                    sp.x + arena.pixels/2, sp.y + arena.pixels/2, 0,
+                    sp.x + arena.pixels/2, sp.y + arena.pixels/2, glowSize
+                );
+                glow.addColorStop(0,'rgba(255,255,255,' + Math.min(0.9,0.04+(0.04 * (sp.speed/maxSpeed))) + ')');
+                glow.addColorStop(0.2,'rgba(255,255,255,' + Math.min(0.45,0.02+(0.02 * (sp.speed/maxSpeed))) + ')');
+                glow.addColorStop(0.4,'rgba(255,255,255,' + Math.min(0.2,0.01+(0.01 * (sp.speed/maxSpeed))) + ')');
+                glow.addColorStop(1,'rgba(255,255,255,0)');
+                context.fillStyle = glow;
+                context.fillRect(sp.x + arena.pixels/2 - glowSize, sp.y + arena.pixels/2 - glowSize, 
+                    glowSize*2, glowSize*2);
             };
             return sp;
         },
