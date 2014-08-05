@@ -23,8 +23,10 @@ Application.Services.service('Canvas', function() {
         render: function(rt,game,step) {
             mainContext.clearRect(0,0,mainCanvas.width,mainCanvas.height);
             mainContext.fillStyle = 'white';
+            // Render streams
             for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
                 game.objects.streams[sp].render(mainContext,rt,step); }
+            // Render gates
             for(var gk in game.objects.gates) { if(!game.objects.gates.hasOwnProperty(gk)) { continue; }
                 game.objects.gates[gk].render(mainContext);
             }

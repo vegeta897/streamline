@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.service('Game', function(Canvas, Objects, $timeout) {
+Application.Services.service('Game', function(Canvas, Objects, Utility, $timeout) {
     console.log('game service initialized',performance.now());
 
     var now, dt = 0, last = 0, fps = 60, step = 1000/fps; // 60 FPS
@@ -39,13 +39,20 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
 
 //    var fireRef = new Firebase('https://streamline.firebaseio.com'); TODO: Firebase
     
-    game.objects.gates['85:35'] = Objects.RedirGateLeft(game.arena,85,35);
-    game.objects.gates['95:45'] = Objects.RedirGateDown(game.arena,95,45);
-    game.objects.gates['105:55'] = Objects.RedirGateUp(game.arena,105,55);
-    game.objects.gates['115:65'] = Objects.RedirGateRight(game.arena,115,65);
+    for(var ix = 0; ix < 19; ix++) {
+        for(var iy = 0; iy < 9; iy++) {
+            var gateDir = ['Up','Down','Left','Right'][Math.floor(Math.random()*4)];
+            new Objects['RedirGate'+gateDir](
+                game,(ix*10+10+Utility.randomInt(-3,3)),(iy*10+10+Utility.randomInt(-3,3)));
+        }
+    }
+//    new Objects.RedirGateLeft(game,85,35);
+//    new Objects.RedirGateDown(game,95,45);
+//    new Objects.RedirGateUp(game,105,55);
+//    new Objects.RedirGateRight(game,115,65);
 
     var update = function(step,dt,now) {
-        game.objects.streamX = {}; game.objects.streamY = {}; game.objects.gateX = {}; game.objects.gateY = {};
+        game.objects.streamX = {}; game.objects.streamY = {};
         var collision = {};
         for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
             var thisSP = game.objects.streams[sp];
@@ -83,7 +90,7 @@ Application.Services.service('Game', function(Canvas, Objects, $timeout) {
         }
         if(game.ticks % 10 == 0) { // Every 10 frames
             Math.seedrandom(game.ticks);
-            if(Math.random() > 0.8) {
+            if(Math.random() > 0.028) {
                 game.objects.streams.push(Objects.StreamPixel(game.arena));
             }
         }
