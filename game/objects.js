@@ -25,7 +25,7 @@ Application.Services.factory('Objects', function(Utility, Canvas) {
     function Gate(game,x,y) { // Prototype for gate
         this.gameX = x; this.gameY = y; this.name = 'Generic Gate';
         this.x = x * game.arena.pixels; this.y = y * game.arena.pixels;
-        this.cost = 50; this.recent = [];
+        this.cost = 50; this.recent = []; this.recharge = 0;
         game.objects.gates[this.gameX+':'+this.gameY] = this;
         game.objects.gateX[this.gameX] = game.objects.gateX.hasOwnProperty(this.gameX) ?
             game.objects.gateX[this.gameX].concat([this]) : [this];
@@ -36,6 +36,7 @@ Application.Services.factory('Objects', function(Utility, Canvas) {
             context.fillRect(this.x, this.y, game.arena.pixels, game.arena.pixels);
         };
         this.update = function(game) {
+            this.recharge -= this.recharge == 0 ? 0 : 1;
             for(var r = 0, rl = this.recent.length; r < rl; r++) {
                 if(game.ticks > this.recent[r] + 240) {
                     this.recent.splice(r,1); r--; rl--;
@@ -55,7 +56,7 @@ Application.Services.factory('Objects', function(Utility, Canvas) {
             context.fillRect(g.x, g.y, game.arena.pixels, game.arena.pixels);
             context.clearRect(g.x + g.outX*2 + game.arena.pixels/2 - 2 - g.outX,
                 g.y + g.outY*2 + game.arena.pixels/2 - 2 - g.outY, 4, 4);
-            context.fillStyle = 'white';
+            context.fillStyle = 'rgba(255,255,255,'+ (1 - g.recharge/20) +')';
             var rect = Canvas.getLineRectangle({x:g.x+g.outX,y:g.y+g.outY},{x:g.x+g.outX*2,y:g.y+g.outY*2},1);
             context.fillRect(rect.x+game.arena.pixels/2,rect.y+game.arena.pixels/2,rect.width,rect.height);
         };
@@ -100,14 +101,15 @@ Application.Services.factory('Objects', function(Utility, Canvas) {
                     game.objects.streamY[gameY] = game.objects.streamY.hasOwnProperty(gameY) ?
                         game.objects.streamY[gameY].concat([sp]) : [sp];
                 }
-                for(var lg = 0, lgl = sp.speed > 50 ? 0 : lineGates.length; lg < lgl; lg++) {
+                // Check for gate collisions
+                for(var lg = 0, lgl = sp.speed > 60 ? 0 : lineGates.length; lg < lgl; lg++) {
                     if(Utility.isBetweenSoftUpper(lineGates[lg][axis],sp[axis],reach)) {
                         sp.x = lineGates[lg].x + lineGates[lg].outX; sp.y = lineGates[lg].y + lineGates[lg].outY;
-                        lineGates[lg].recent.push(game.ticks);
+                        lineGates[lg].recent.push(game.ticks); lineGates[lg].recharge = 20;
                         sp.gates.push({ x: lineGates[lg].x, y: lineGates[lg].y, lastDir: sp.direction, 
                             speed: sp.speed, tick: game.ticks });
                         sp.direction = lineGates[lg].direction;
-                        sp.speed *= 1.2;
+                        sp.speed *= 1.1;
                     }
                 }
                 if(sp.gates.length > 0) { // If there is at least one gate in tail...
