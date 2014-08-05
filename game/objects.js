@@ -150,11 +150,11 @@ Application.Services.factory('Objects', function(Utility, Canvas) {
                             y: gradStart.y - DIR[thisDir].y*thisSpeed*15 };
                     }
                     var tailGrad = context.createLinearGradient(gradStart.x,gradStart.y,gradEnd.x,gradEnd.y);
-                    tailGrad.addColorStop(0,'rgba(255,255,255,' + Math.min(0.8,sp.speed/maxSpeed * 0.412) + ')');
-                    tailGrad.addColorStop(0.2,'rgba(255,255,255,' + Math.min(0.4,sp.speed/maxSpeed * 0.206) + ')');
-                    tailGrad.addColorStop(0.4,'rgba(255,255,255,' + Math.min(0.2,sp.speed/maxSpeed * 0.103) + ')');
+                    tailGrad.addColorStop(0,'rgba(255,255,255,' + Math.min(0.8,sp.speed/maxSpeed * 0.2) + ')');
+                    tailGrad.addColorStop(0.2,'rgba(255,255,255,' + Math.min(0.4,sp.speed/maxSpeed * 0.1) + ')');
+                    tailGrad.addColorStop(0.4,'rgba(255,255,255,' + Math.min(0.2,sp.speed/maxSpeed * 0.05) + ')');
                     tailGrad.addColorStop(1,'rgba(255,255,255,0)');
-                    context.fillStyle = tailGrad;//'rgba(255,255,255,0.1)';
+                    context.fillStyle = tailGrad;
                     var tailRect = Canvas.getLineRectangle(start,end,1.5);
                     context.fillRect(tailRect.x + arena.pixels/2, tailRect.y + arena.pixels/2,
                         tailRect.width, tailRect.height);

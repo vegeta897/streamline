@@ -65,7 +65,7 @@ Application.Services.service('Canvas', function() {
                 highContext.clearRect(cursor.x*gridSize+2,cursor.y*gridSize-1,gridSize-4,gridSize+2);
                 highContext.clearRect(cursor.x*gridSize,cursor.y*gridSize,gridSize,gridSize);
             }
-            highContext.fillStyle = 'rgba(255,255,255,0.5';
+            highContext.fillStyle = 'rgba(255,255,255,0.3';
             var highlightGates = function(coord,gates) {
                 if(gates.hasOwnProperty(coord)) {
                     for(var g = 0, gl = gates[coord].length; g < gl; g++) {
