@@ -20,7 +20,7 @@
         </p>
     </section>
     <section id="controls" ng-controller="Controls" ng-cloak>
-        <section>
+        <section ng-hide="game.crashed">
             <h2>Welcome to Streamline!</h2>
             <div class="button-group">
                 <button ng-hide="game.paused" ng-click="pause()">Pause</button>
@@ -35,7 +35,7 @@
                 <dt>Gates: <strong>{{ game.gateCount }}</strong></dt>
             </dl>
         </section>
-        <section>
+        <section ng-hide="game.crashed">
             <div class="button-group">
                 <button ng-click="buildGate('RedirGateUp')">W. <strong>Up Gate</strong></button>
                 <button ng-click="buildGate('RedirGateLeft')">A. <strong>Left Gate</strong></button>
@@ -47,6 +47,7 @@
                 Click a button or press a hotkey to select a building type. <strong>Left click</strong> in the arena to build it, or <strong>right click</strong> to cancel
             </p>
         </section>
+        <p ng-show="game.crashed" class="error"><strong>Game crashed!</strong> Please refresh.</p>
     </section>
     <script src="PHP/ServerDate.php"></script> <!-- For syncing local time -->
     <!-- JS -->

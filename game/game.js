@@ -8,7 +8,7 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
     var game = { 
         arena: { width: 200, height: 100, pixels: 6 },  
         objects: { streams: [], streamX: {}, streamY: {}, collisions: [], gates: {}, gateX: {}, gateY: {} },
-        player: { input: {} }, 
+        player: { input: {} },
         fps: 60
     };
     game.frames = game.frameCount = game.localServerOffset = game.gateCount = game.framesPerSecond = 
@@ -17,7 +17,9 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
     Canvas.setGridSize(game.arena.pixels,game);
 
     var tick = function() {
+        if(game.crashed) { return; }
         now = performance.now(); dt += (now - last);
+        if(dt > 60000) { console.log('too many updates missed! game crash'); game.crashed = game.paused = true; }
         if(dt > step) {
             while(dt >= step) { 
                 dt -= step; if(game.paused && !game.oneFrame) { continue; } 
@@ -111,6 +113,8 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
 //        }
         
         if(game.ticks % game.fps == 0) { // Every game second
+            game.framesPerSecond = game.frameCount;
+            game.tickCount = game.frameCount = 0;
         }
         if(game.ticks % 5 == 0) { // Every 5 frames
             
@@ -120,8 +124,6 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
             if(Math.random() > 0.08 && (game.objects.streams.length == 0 || !debug.oneStream)) {
                 game.objects.streams.push(Objects.StreamPixel(game.arena));
             }
-            game.framesPerSecond = game.frameCount*game.fps/10;
-            game.tickCount = game.frameCount = 0;
         }
         game.tickCount++;
     };

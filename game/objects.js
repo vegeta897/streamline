@@ -65,7 +65,6 @@ Application.Services.service('Objects', function(Utility, Canvas) {
             var minSpeed = 3, maxSpeed = 9, glowMin = 8;
             sp.speed = Utility.randomInt(minSpeed,maxSpeed);
             sp.direction = ['up','up','down','down','left','right'][Math.floor(Math.random()*6)];
-            //sp.direction = 'right';
             switch(sp.direction) {
                 case 'up': sp.x = Math.floor(Math.random()*arena.width)*arena.pixels;
                     sp.y = arena.height*arena.pixels + sp.speed * glowMin + sp.speed; break;
@@ -76,9 +75,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                 case 'left': sp.x = arena.width*arena.pixels + sp.speed * glowMin + sp.speed;
                     sp.y = Math.floor(Math.random()*arena.height)*arena.pixels; break;
             }
-            //sp.y = 300;
-            sp.worth = sp.speed * 10;
-            sp.gates = [];
+            sp.worth = sp.speed * 10; sp.gates = [];
             var tailLength = function() { return sp.speed * 60 / 4; };
             sp.update = function(game) {
                 sp.move();
@@ -108,8 +105,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                         lineGates[lg].recent.push(game.ticks); lineGates[lg].recharge = 20;
                         sp.gates.push({ x: lineGates[lg].x, y: lineGates[lg].y, lastDir: sp.direction, 
                             speed: sp.speed, tick: game.ticks });
-                        sp.direction = lineGates[lg].direction;
-                        sp.speed *= 1.05;
+                        sp.direction = lineGates[lg].direction; sp.speed *= 1.07; // ~35 bounces for speed 6
                     }
                 }
                 if(newPos.x) { sp.x = newPos.x; sp.y = newPos.y; } // Move pixel to final position
@@ -171,13 +167,11 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                     sp.x + arena.pixels/2, sp.y + arena.pixels/2, 0,
                     sp.x + arena.pixels/2, sp.y + arena.pixels/2, glowSize
                 );
-                glow.addColorStop(0,'rgba(255,255,255,' + Math.min(0.9,0.04+(0.04 * (sp.speed/maxSpeed))) + ')');
-                glow.addColorStop(0.2,'rgba(255,255,255,' + Math.min(0.45,0.02+(0.02 * (sp.speed/maxSpeed))) + ')');
-                glow.addColorStop(0.4,'rgba(255,255,255,' + Math.min(0.2,0.01+(0.01 * (sp.speed/maxSpeed))) + ')');
-                glow.addColorStop(1,'rgba(255,255,255,0)');
-                context.fillStyle = glow;
-                context.fillRect(sp.x + arena.pixels/2 - glowSize, sp.y + arena.pixels/2 - glowSize, 
-                    glowSize*2, glowSize*2);
+                glow.addColorStop(0,'rgba(255,255,255,'+ Math.min(0.9,0.04+(0.04 * (sp.speed/maxSpeed))) +')');
+                glow.addColorStop(0.2,'rgba(255,255,255,'+ Math.min(0.45,0.02+(0.02 * (sp.speed/maxSpeed))) +')');
+                glow.addColorStop(0.4,'rgba(255,255,255,'+ Math.min(0.2,0.01+(0.01 * (sp.speed/maxSpeed))) +')');
+                glow.addColorStop(1,'rgba(255,255,255,0)'); context.fillStyle = glow;
+                context.fillRect(sp.x+arena.pixels/2-glowSize,sp.y+arena.pixels/2-glowSize,glowSize*2,glowSize*2);
             };
             return sp;
         },
