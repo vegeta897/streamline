@@ -1,5 +1,8 @@
 'use strict';
 Application.Services.service('Canvas', function() {
+    
+    // TODO: Define all colors here, and have objects use this service to get colors
+    // This will allow color schemes
 
     var mainCanvas = document.getElementById('mainCanvas');
     var highCanvas = document.getElementById('highCanvas');
@@ -13,9 +16,8 @@ Application.Services.service('Canvas', function() {
     
     var onMouseMove = function(e) {
         var offset = jQuery(mainCanvas).offset();
-        var x = e.pageX - offset.left < 0 ? 0 : Math.floor((e.pageX - offset.left - 1) / gridSize);
-        var y = e.pageY - offset.top < 0 ? 0 : Math.floor((e.pageY - offset.top - 1) / gridSize);
-        if(cursor.x != x || cursor.y != y) { cursor.x = x; cursor.y = y; }
+        cursor.x = e.pageX - offset.left < 0 ? 0 : Math.floor((e.pageX - offset.left) / gridSize);
+        cursor.y = e.pageY - offset.top < 0 ? 0 : Math.floor((e.pageY - offset.top) / gridSize);
     };
     var onMouseOut = function() { cursor.x = cursor.y = '-'; };
     
@@ -56,7 +58,7 @@ Application.Services.service('Canvas', function() {
             highContext.fillStyle = 'rgba(255,255,255,' + (0.08 + cursor.highlightY/100) + ')';
             highContext.fillRect(0,cursor.y*gridSize+0.5,highCanvas.width,gridSize-1);
             if(game.player.building) {
-                highContext.fillStyle = 'rgba(255,0,0,0.5)';
+                highContext.fillStyle = 'rgba(0,255,0,0.5)';
                 highContext.fillRect(cursor.x*gridSize,cursor.y*gridSize,gridSize,gridSize);
             } else {
                 highContext.fillStyle = 'rgba(255,255,255,0.3)';
@@ -80,7 +82,9 @@ Application.Services.service('Canvas', function() {
         },
         cursor: cursor,
         setGridSize: function(pixels,theGame) { gridSize = pixels; game = theGame;
-            jQuery(highCanvas).mousemove(onMouseMove).mouseleave(onMouseOut); },
+            highCanvas.addEventListener('mousemove',onMouseMove,false);
+            highCanvas.addEventListener('mouseleave',onMouseOut,false);
+        },
         getLineRectangle: function(start,end,expand) {
             if(start.x > end.x) { // Right to left
                 return { x: start.x + expand, y: start.y - expand, 

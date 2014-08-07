@@ -16,30 +16,36 @@
         </canvas>
         <canvas id="highCanvas" width="1200" height="600"></canvas>
         <p class="coords">
-            <strong>{{ game.arena.cursor.x }}</strong> , <strong>{{ game.arena.cursor.y }}</strong>
+            <strong>{{ game.player.cursor.x }}</strong> , <strong>{{ game.player.cursor.y }}</strong>
         </p>
     </section>
     <section id="controls" ng-controller="Controls" ng-cloak>
         <section>
             <h2>Welcome to Streamline!</h2>
-            <button ng-hide="game.paused" ng-click="pause()">Pause</button>
-            <button ng-show="game.paused" ng-click="resume()">Resume</button>
-            <button ng-show="game.paused" ng-click="oneFrame()">1 Frame</button>
+            <div class="button-group">
+                <button ng-hide="game.paused" ng-click="pause()">Pause</button>
+                <button ng-show="game.paused" ng-click="resume()">Resume</button>
+                <button ng-show="game.paused" ng-click="oneFrame()">1 Frame</button>
+            </div>
             <dl>
-                <dt>Game-Seconds Elapsed: <strong>{{ game.secondsElapsed }}</strong></dt>
                 <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
-                <dt>Frame Count: <strong>{{ game.frames }}</strong></dt>
-                <dt>Frames Dropped: <strong>{{ game.framesDropped }}</strong></dt>
                 <dt>Global Tick: <strong>{{ game.ticks }}</strong></dt>
                 <dt>Local/Server Offset: <strong>{{ game.localServerOffset }}</strong> ms</dt>
                 <dt>Stream Pixels: <strong>{{ game.objects.streams.length }}</strong></dt>
+                <dt>Gates: <strong>{{ game.gateCount }}</strong></dt>
             </dl>
         </section>
         <section>
-            <button ng-disabled="true" ng-click="buildGate('left')">Left Gate</button>
-            <button ng-disabled="true" ng-click="buildGate('down')">Down Gate</button>
-            <button ng-disabled="true" ng-click="buildGate('up')">Up Gate</button>
-            <button ng-disabled="true" ng-click="buildGate('right')">Right Gate</button>
+            <div class="button-group">
+                <button ng-click="buildGate('RedirGateUp')">W. <strong>Up Gate</strong></button>
+                <button ng-click="buildGate('RedirGateLeft')">A. <strong>Left Gate</strong></button>
+                <button ng-click="buildGate('RedirGateDown')">S. <strong>Down Gate</strong></button>
+                <button ng-click="buildGate('RedirGateRight')">D. <strong>Right Gate</strong></button>
+                <button ng-click="clearGates()">Clear Gates</button>
+            </div>
+            <p>
+                Click a button or press a hotkey to select a building type. <strong>Left click</strong> in the arena to build it, or <strong>right click</strong> to cancel
+            </p>
         </section>
     </section>
     <script src="PHP/ServerDate.php"></script> <!-- For syncing local time -->
@@ -50,9 +56,10 @@
     <script src="app/app.js"></script>
     <script src="arena/arena.js"></script>
     <script src="canvas/canvas.js"></script>
-    <script src="controls/controls.js"></script>
     <script src="common/utility.js"></script>
+    <script src="controls/controls.js"></script>
     <script src="game/game.js"></script>
+    <script src="game/input.js"></script>
     <script src="game/objects.js"></script>
     <script src="js/vendor/seedrandom.js"></script>
 </body>

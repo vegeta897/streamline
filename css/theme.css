@@ -8,6 +8,8 @@ h1 { font-size: 3em; color: #d3d9b9; text-shadow: none; -webkit-text-fill-color:
 
 h2 { color: #f2f5eb; }
 
-canvas#mainCanvas { background: url('../img/grid-dot.gif') #434767; border-color: #222; }
+section#arena { border-color: #222; background: #434767; }
 
 strong { font-weight: bold; color: #f2f5eb; }
+button strong { color: inherit; }
+.button-group { display: inline-block; border-color: #656666; }

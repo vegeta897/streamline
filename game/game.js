@@ -1,13 +1,14 @@
 'use strict';
-Application.Services.service('Game', function(Canvas, Objects, Utility, $timeout) {
+Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $timeout) {
     console.log('game service initialized',performance.now());
 
     var game = { 
         arena: { width: 200, height: 100, pixels: 6 },  
         objects: { streams: [], streamX: {}, streamY: {}, collisions: [], gates: {}, gateX: {}, gateY: {} },
-        player: {  }, fps: 60
+        player: { input: {} }, 
+        fps: 60
     };
-    game.secondsElapsed = game.frames = game.framesDropped = game.frameCount = game.localServerOffset =
+    game.secondsElapsed = game.frames = game.frameCount = game.localServerOffset = game.gateCount =
         game.framesPerSecond = game.tickCount = game.ticksPerSecond = 0;
     var now, dt = 0, last = 0, rendered = false, step = 1000/game.fps; // 60 FPS
     Canvas.setGridSize(game.arena.pixels,game);
@@ -15,7 +16,6 @@ Application.Services.service('Game', function(Canvas, Objects, Utility, $timeout
     var tick = function() {
         now = performance.now(); dt += (now - last);
         if(dt > step) {
-            if(!rendered) { game.framesDropped++; } // If the last update wasn't rendered, we dropped a frame
             while(dt >= step) { 
                 dt -= step; if(game.paused && !game.oneFrame) { continue; } 
                 game.ticks++; update(step,dt,now);
@@ -34,11 +34,11 @@ Application.Services.service('Game', function(Canvas, Objects, Utility, $timeout
     
     setTimeout(function(){ // Wait a second for server time to sync
         game.localServerOffset = document.domain == 'localhost' ? 9700 : ServerDate.now() - Date.now();
-        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1407110000000) / step);
+        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1407300000000) / step);
         last = performance.now();
         setInterval(tick,step);
         requestAnimationFrame(frame); // Request the next frame
-    },1000);
+    },1200);
 
 //    var fireRef = new Firebase('https://streamline.firebaseio.com'); TODO: Firebase
     
@@ -62,11 +62,17 @@ Application.Services.service('Game', function(Canvas, Objects, Utility, $timeout
 //    new Objects.RedirGateRight(game,35,55);
 //    new Objects.RedirGateUp(game,40,55);
 //    new Objects.RedirGateRight(game,40,50);
-    
+
+    game.player.cursor = Canvas.cursor;
 
     var update = function(step,dt,now) {
+        Input.process(game);
         game.objects.streamX = {}; game.objects.streamY = {};
-        var collision = {};
+//        var collision = {};
+        if(game.player.build) {
+            new Objects[game.player.build](game,game.player.cursor.x,game.player.cursor.y);
+            game.player.build = false;
+        }
         for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
             var thisSP = game.objects.streams[sp];
 //            var spGrid = Math.round(thisSP.x/game.arena.pixels)+':'+Math.round(thisSP.y/game.arena.pixels);
@@ -87,12 +93,12 @@ Application.Services.service('Game', function(Canvas, Objects, Utility, $timeout
             var thisC = game.objects.collisions[c];
             if(game.ticks - thisC.tick > 30) { game.objects.collisions.splice(c,1); c--; cl--; }
         }
-        
+        game.gateCount = 0;
         for(var gk in game.objects.gates) { if(!game.objects.gates.hasOwnProperty(gk)) { continue; }
             game.objects.gates[gk].update(game);
+            game.gateCount++;
         }
         
-        game.arena.cursor = Canvas.cursor;
         if(game.ticks % game.fps == 0) { // Every game second
             game.secondsElapsed = game.ticks / game.fps;
             game.framesPerSecond = game.frameCount;
@@ -113,6 +119,7 @@ Application.Services.service('Game', function(Canvas, Objects, Utility, $timeout
     return { 
         game: game,
         pause: function() { game.paused = true; }, resume: function() { game.paused = false; },
-        oneFrame: function() { game.oneFrame = true; }
+        oneFrame: function() { game.oneFrame = true; },
+        clearGates: function() { game.objects.gates = {}; game.objects.gateX = {}; game.objects.gateY = {}; }
     }
 });

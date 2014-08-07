@@ -4,12 +4,13 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 body { width: 1202px; margin: 0 auto; }
 header { margin: 8px 0; }
 h1 { margin: 0; }
-section#arena { position: relative; }
-canvas#mainCanvas { border: 1px solid; }
-canvas#highCanvas { position: absolute; top: 1px; left: 1px; }
+section#arena { position: relative; border: 1px solid; height: 600px; background: #555; }
+canvas#mainCanvas { background: url('../img/grid-dot.png'); }
+canvas#highCanvas { position: absolute; top: 0; left: 0; }
 section#arena p.coords { margin-right: 2px; float: right; text-align: right; }
 section#controls { padding: 6px 0; }
 section#controls>section { float: left; }
 section#controls>section:first-child { width: 300px; }
 h2 { font-size: 1.5em; margin-bottom: 8px; }
+.button-group { padding: 4px; margin-bottom: 8px; border: 1px solid; }
 dl dt { line-height: 1.2em; }

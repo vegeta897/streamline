@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Objects', function(Utility, Canvas) {
+Application.Services.service('Objects', function(Utility, Canvas) {
     var DIR = { up: {x:0,y:-1}, down: {x:0,y:1}, left: {x:-1,y:0}, right: {x:1,y:0} };
     
     function Movable(arena) { // Prototype for movable object
