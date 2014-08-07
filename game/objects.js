@@ -27,10 +27,6 @@ Application.Services.service('Objects', function(Utility, Canvas) {
         this.x = x * game.arena.pixels; this.y = y * game.arena.pixels;
         this.cost = 50; this.recent = []; this.recharge = 0;
         game.objects.gates[this.gameX+':'+this.gameY] = this;
-        game.objects.gateX[this.gameX] = game.objects.gateX.hasOwnProperty(this.gameX) ?
-            game.objects.gateX[this.gameX].concat([this]) : [this];
-        game.objects.gateY[this.gameY] = game.objects.gateY.hasOwnProperty(this.gameY) ?
-            game.objects.gateY[this.gameY].concat([this]) : [this];
         this.render = function(context) {
             context.fillStyle = 'red';
             context.fillRect(this.x, this.y, game.arena.pixels, game.arena.pixels);

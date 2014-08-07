@@ -33,7 +33,7 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
     };
     
     setTimeout(function(){ // Wait a second for server time to sync
-        game.localServerOffset = document.domain == 'localhost' ? 9700 : ServerDate.now() - Date.now();
+        game.localServerOffset = document.domain == 'localhost' ? 400 : ServerDate.now() - Date.now();
         game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1407300000000) / step);
         last = performance.now();
         setInterval(tick,step);
@@ -67,7 +67,7 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
 
     var update = function(step,dt,now) {
         Input.process(game);
-        game.objects.streamX = {}; game.objects.streamY = {};
+        game.objects.streamX = {}; game.objects.streamY = {}; game.objects.gateX = {}; game.objects.gateY = {};
 //        var collision = {};
         if(game.player.build) {
             new Objects[game.player.build](game,game.player.cursor.x,game.player.cursor.y);
@@ -96,6 +96,14 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
         game.gateCount = 0;
         for(var gk in game.objects.gates) { if(!game.objects.gates.hasOwnProperty(gk)) { continue; }
             game.objects.gates[gk].update(game);
+            game.objects.gateX[game.objects.gates[gk].gameX] = 
+                game.objects.gateX.hasOwnProperty(game.objects.gates[gk].gameX) ?
+                game.objects.gateX[game.objects.gates[gk].gameX].concat([game.objects.gates[gk]]) 
+                    : [game.objects.gates[gk]];
+            game.objects.gateY[game.objects.gates[gk].gameY] = 
+                game.objects.gateY.hasOwnProperty(game.objects.gates[gk].gameY) ?
+                game.objects.gateY[game.objects.gates[gk].gameY].concat([game.objects.gates[gk]]) 
+                    : [game.objects.gates[gk]];
             game.gateCount++;
         }
         
@@ -120,6 +128,6 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
         game: game,
         pause: function() { game.paused = true; }, resume: function() { game.paused = false; },
         oneFrame: function() { game.oneFrame = true; },
-        clearGates: function() { game.objects.gates = {}; game.objects.gateX = {}; game.objects.gateY = {}; }
+        clearGates: function() { game.objects.gates = {}; }
     }
 });
