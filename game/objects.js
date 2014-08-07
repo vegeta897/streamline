@@ -97,17 +97,22 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                     game.objects.streamY[gameY] = game.objects.streamY.hasOwnProperty(gameY) ?
                         game.objects.streamY[gameY].concat([sp]) : [sp];
                 }
+                var order = DIR[sp.direction].x + DIR[sp.direction].y < 0;
+                lineGates = Utility.sortArrayByProperty(lineGates,axis=='x'?'gameY':'gameX',order);
+                var newPos = {}; // Store new position temporarily, so we don't skip gates
                 // Check for gate collisions
                 for(var lg = 0, lgl = sp.speed > 60 ? 0 : lineGates.length; lg < lgl; lg++) {
                     if(Utility.isBetweenSoftUpper(lineGates[lg][axis],sp[axis],reach)) {
-                        sp.x = lineGates[lg].x + lineGates[lg].outX; sp.y = lineGates[lg].y + lineGates[lg].outY;
+                        newPos.x = lineGates[lg].x + lineGates[lg].outX; 
+                        newPos.y = lineGates[lg].y + lineGates[lg].outY;
                         lineGates[lg].recent.push(game.ticks); lineGates[lg].recharge = 20;
                         sp.gates.push({ x: lineGates[lg].x, y: lineGates[lg].y, lastDir: sp.direction, 
                             speed: sp.speed, tick: game.ticks });
                         sp.direction = lineGates[lg].direction;
-                        sp.speed *= 1.1;
+                        sp.speed *= 1.05;
                     }
                 }
+                if(newPos.x) { sp.x = newPos.x; sp.y = newPos.y; } // Move pixel to final position
                 if(sp.gates.length > 0) { // If there is at least one gate in tail...
                     sp.gates[sp.gates.length-1].dist = // Update the latest gate's distance
                         Math.abs((sp.x - sp.gates[sp.gates.length-1].x) + (sp.y - sp.gates[sp.gates.length-1].y)) }

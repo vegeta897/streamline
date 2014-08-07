@@ -2,14 +2,17 @@
 Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $timeout) {
     console.log('game service initialized',performance.now());
 
+    var debug = {};
+    //debug.oneStream = true;
+    
     var game = { 
         arena: { width: 200, height: 100, pixels: 6 },  
         objects: { streams: [], streamX: {}, streamY: {}, collisions: [], gates: {}, gateX: {}, gateY: {} },
         player: { input: {} }, 
         fps: 60
     };
-    game.secondsElapsed = game.frames = game.frameCount = game.localServerOffset = game.gateCount =
-        game.framesPerSecond = game.tickCount = game.ticksPerSecond = 0;
+    game.frames = game.frameCount = game.localServerOffset = game.gateCount = game.framesPerSecond = 
+        game.tickCount = 0;
     var now, dt = 0, last = 0, rendered = false, step = 1000/game.fps; // 60 FPS
     Canvas.setGridSize(game.arena.pixels,game);
 
@@ -73,6 +76,19 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
             new Objects[game.player.build](game,game.player.cursor.x,game.player.cursor.y);
             game.player.build = false;
         }
+        game.gateCount = 0;
+        for(var gk in game.objects.gates) { if(!game.objects.gates.hasOwnProperty(gk)) { continue; }
+            game.objects.gates[gk].update(game);
+            game.objects.gateX[game.objects.gates[gk].gameX] =
+                game.objects.gateX.hasOwnProperty(game.objects.gates[gk].gameX) ?
+                    game.objects.gateX[game.objects.gates[gk].gameX].concat([game.objects.gates[gk]])
+                    : [game.objects.gates[gk]];
+            game.objects.gateY[game.objects.gates[gk].gameY] =
+                game.objects.gateY.hasOwnProperty(game.objects.gates[gk].gameY) ?
+                    game.objects.gateY[game.objects.gates[gk].gameY].concat([game.objects.gates[gk]])
+                    : [game.objects.gates[gk]];
+            game.gateCount++;
+        }
         for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
             var thisSP = game.objects.streams[sp];
 //            var spGrid = Math.round(thisSP.x/game.arena.pixels)+':'+Math.round(thisSP.y/game.arena.pixels);
@@ -89,37 +105,23 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
             if(thisSP.delete) { game.objects.streams.splice(sp,1); sp--; spl--; }
         }
 
-        for(var c = 0, cl = game.objects.collisions.length; c < cl; c++) {
-            var thisC = game.objects.collisions[c];
-            if(game.ticks - thisC.tick > 30) { game.objects.collisions.splice(c,1); c--; cl--; }
-        }
-        game.gateCount = 0;
-        for(var gk in game.objects.gates) { if(!game.objects.gates.hasOwnProperty(gk)) { continue; }
-            game.objects.gates[gk].update(game);
-            game.objects.gateX[game.objects.gates[gk].gameX] = 
-                game.objects.gateX.hasOwnProperty(game.objects.gates[gk].gameX) ?
-                game.objects.gateX[game.objects.gates[gk].gameX].concat([game.objects.gates[gk]]) 
-                    : [game.objects.gates[gk]];
-            game.objects.gateY[game.objects.gates[gk].gameY] = 
-                game.objects.gateY.hasOwnProperty(game.objects.gates[gk].gameY) ?
-                game.objects.gateY[game.objects.gates[gk].gameY].concat([game.objects.gates[gk]]) 
-                    : [game.objects.gates[gk]];
-            game.gateCount++;
-        }
+//        for(var c = 0, cl = game.objects.collisions.length; c < cl; c++) {
+//            var thisC = game.objects.collisions[c];
+//            if(game.ticks - thisC.tick > 30) { game.objects.collisions.splice(c,1); c--; cl--; }
+//        }
         
         if(game.ticks % game.fps == 0) { // Every game second
-            game.secondsElapsed = game.ticks / game.fps;
-            game.framesPerSecond = game.frameCount;
-            game.ticksPerSecond = game.tickCount;
-            game.tickCount = game.frameCount = 0;
         }
         if(game.ticks % 5 == 0) { // Every 5 frames
+            
         }
         if(game.ticks % 10 == 0) { // Every 10 frames
             Math.seedrandom(game.ticks);
-            if(Math.random() > 0.08/* && game.objects.streams.length == 0*/) {
+            if(Math.random() > 0.08 && (game.objects.streams.length == 0 || !debug.oneStream)) {
                 game.objects.streams.push(Objects.StreamPixel(game.arena));
             }
+            game.framesPerSecond = game.frameCount*game.fps/10;
+            game.tickCount = game.frameCount = 0;
         }
         game.tickCount++;
     };
