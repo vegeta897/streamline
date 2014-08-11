@@ -119,7 +119,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                 for(var g = sp.gates.length - 1; g >= 0; g--) { // Trim gate list based on age
                     if(game.ticks > sp.gates[g].tick + game.fps * 1.5) { sp.gates.splice(g,1); }
                 }
-                sp.delete = !sp.gates.length && sp.speed == 0; 
+                if(!sp.gates.length && sp.speed == 0) { sp.delete = true; }
             };
             sp.render = function(context,rt,step,tick) {
                 // Render tail
