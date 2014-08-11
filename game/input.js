@@ -13,10 +13,11 @@ Application.Services.service('Input', function() {
     var onKey = function(e,key,pressed) {
         switch(key) {
             // Building hotkeys
-            case KEY.W: input.kb.w = pressed; e.preventDefault(); break; 
+            case KEY.W: input.kb.w = pressed; e.preventDefault(); break;
             case KEY.A: input.kb.a = pressed; e.preventDefault(); break;
-            case KEY.S: input.kb.s = pressed; e.preventDefault(); break; 
+            case KEY.S: input.kb.s = pressed; e.preventDefault(); break;
             case KEY.D: input.kb.d = pressed; e.preventDefault(); break;
+            case KEY.H: input.kb.h = pressed; e.preventDefault(); break;
         } 
     };
     var onMouse = function(e,button,pressed) {
@@ -25,7 +26,8 @@ Application.Services.service('Input', function() {
             case 3: input.mouse.right = pressed; e.preventDefault(); break;
         }
     };
-    var BUILD = { w: 'RedirGateUp', a: 'RedirGateLeft', s: 'RedirGateDown', d: 'RedirGateRight' };
+    var BUILD = { w: 'RedirGateUp', a: 'RedirGateLeft', s: 'RedirGateDown', d: 'RedirGateRight',
+        h: 'HomeGate' };
     return {
         process: function(game) {
             for(var key in input.kb) { if(!input.kb.hasOwnProperty(key)) { continue; }

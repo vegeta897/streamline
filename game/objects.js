@@ -74,7 +74,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                     sp.y = Math.floor(Math.random()*arena.height)*arena.pixels; break;
             }
             //sp.direction = 'down'; sp.x = 600; sp.y = 0;
-            sp.worth = sp.speed * 10; sp.gates = [];
+            sp.gates = [];
             var tailLength = function() { return sp.speed * 60 / 4; };
             sp.update = function(game) {
                 sp.move();
@@ -108,7 +108,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                             sp.direction = lineGates[lg].direction; sp.speed *= 1.07; // ~35 bounces for speed 6
                         }
                         if(lineGates[lg].name == 'Home Gate') {
-                            sp.speed = 0; lineGates[lg].score(sp.worth);
+                            lineGates[lg].score(sp.speed*10); sp.speed = 0;
                         }
                     }
                 }
