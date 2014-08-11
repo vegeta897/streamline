@@ -15,3 +15,5 @@ h2 { font-size: 1.5em; margin-bottom: 8px; }
 .button-group { padding: 4px; margin-bottom: 8px; border: 1px solid; }
 dl dt { line-height: 1.2em; }
 p { margin-bottom: 1em; }
+
+[ng\:cloak], [ng-cloak], .ng-cloak { display: none !important; }
