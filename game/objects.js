@@ -17,9 +17,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                 || this.y < -arena.pixels * this.speed * 3 ||
                 this.y > arena.height * arena.pixels + arena.pixels * this.speed * 3;
         };
-        this.update = function() {
-            this.move();
-        };
+        this.update = function() { this.move(); };
     }
     
     function Gate(game,x,y) { // Prototype for gate
@@ -60,8 +58,8 @@ Application.Services.service('Objects', function(Utility, Canvas) {
     }
     
     return {
-        StreamPixel: function(arena) {
-            var sp = new Movable(arena);
+        StreamPixel: function(arena,tick) {
+            var sp = new Movable(arena); sp.id = tick;
             var minSpeed = 3, maxSpeed = 9, glowMin = 8;
             sp.speed = Utility.randomInt(minSpeed,maxSpeed);
             sp.direction = ['up','up','down','down','left','right'][Math.floor(Math.random()*6)];
@@ -75,6 +73,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                 case 'left': sp.x = arena.width*arena.pixels + sp.speed * glowMin + sp.speed;
                     sp.y = Math.floor(Math.random()*arena.height)*arena.pixels; break;
             }
+            //sp.direction = 'down'; sp.x = 600; sp.y = 0;
             sp.worth = sp.speed * 10; sp.gates = [];
             var tailLength = function() { return sp.speed * 60 / 4; };
             sp.update = function(game) {
@@ -100,12 +99,17 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                 // Check for gate collisions
                 for(var lg = 0, lgl = sp.speed > 60 ? 0 : lineGates.length; lg < lgl; lg++) {
                     if(Utility.isBetweenSoftUpper(lineGates[lg][axis],sp[axis],reach)) {
-                        newPos.x = lineGates[lg].x + lineGates[lg].outX; 
-                        newPos.y = lineGates[lg].y + lineGates[lg].outY;
-                        lineGates[lg].recent.push(game.ticks); lineGates[lg].recharge = 20;
-                        sp.gates.push({ x: lineGates[lg].x, y: lineGates[lg].y, lastDir: sp.direction, 
+                        sp.gates.push({ x: lineGates[lg].x, y: lineGates[lg].y, lastDir: sp.direction,
                             speed: sp.speed, tick: game.ticks });
-                        sp.direction = lineGates[lg].direction; sp.speed *= 1.07; // ~35 bounces for speed 6
+                        if(lineGates[lg].hasOwnProperty('outX')) {
+                            newPos.x = lineGates[lg].x + lineGates[lg].outX;
+                            newPos.y = lineGates[lg].y + lineGates[lg].outY;
+                            lineGates[lg].recent.push(game.ticks); lineGates[lg].recharge = 20;
+                            sp.direction = lineGates[lg].direction; sp.speed *= 1.07; // ~35 bounces for speed 6
+                        }
+                        if(lineGates[lg].name == 'Home Gate') {
+                            sp.speed = 0; lineGates[lg].score(sp.worth);
+                        }
                     }
                 }
                 if(newPos.x) { sp.x = newPos.x; sp.y = newPos.y; } // Move pixel to final position
@@ -115,20 +119,22 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                 for(var g = sp.gates.length - 1; g >= 0; g--) { // Trim gate list based on age
                     if(game.ticks > sp.gates[g].tick + game.fps * 1.5) { sp.gates.splice(g,1); }
                 }
+                sp.delete = !sp.gates.length && sp.speed == 0; 
             };
             sp.render = function(context,rt,step,tick) {
                 // Render tail
                 for(var ts = sp.gates.length; ts >= 0; ts--) {
-                    var start, end, ticksRemain, gradStart, gradEnd, portion;
+                    var start, end, ticksRemain, gradStart, gradEnd, portion, thisSpeed = sp.speed;
                     if(ts == sp.gates.length) { // From the pixel
                         start = gradStart = { x: sp.x, y: sp.y };
                     } else { // From a gate
                         ticksRemain = 90-(tick-sp.gates[ts].tick);
                         portion = ticksRemain/90;
                         start = { x: sp.gates[ts].x, y: sp.gates[ts].y };
+                        thisSpeed = sp.gates[ts].speed;
                         gradStart = { 
-                            x: start.x + DIR[sp.gates[ts].lastDir].x*(1-portion)*sp.gates[ts].speed*15,
-                            y: start.y + DIR[sp.gates[ts].lastDir].y*(1-portion)*sp.gates[ts].speed*15 };
+                            x: start.x + DIR[sp.gates[ts].lastDir].x*(1-portion)*thisSpeed*15,
+                            y: start.y + DIR[sp.gates[ts].lastDir].y*(1-portion)*thisSpeed*15 };
                     }
                     if(sp.gates.length == 0) { // No gates in tail?
                         end = { x: sp.x - DIR[sp.direction].x*tailLength(),
@@ -143,15 +149,15 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                         gradEnd = end;
                     } else { // Connect to next gate
                         end = { x: sp.gates[ts-1].x, y: sp.gates[ts-1].y };
-                        var thisSpeed = ts == sp.gates.length ? sp.speed: sp.gates[ts].speed, 
-                            thisDir = ts == sp.gates.length ? sp.direction : sp.gates[ts].lastDir;
+                        thisSpeed = ts == sp.gates.length ? sp.speed: sp.gates[ts].speed;
+                        var thisDir = ts == sp.gates.length ? sp.direction : sp.gates[ts].lastDir;
                         gradEnd = { x: gradStart.x - DIR[thisDir].x*thisSpeed*15, 
                             y: gradStart.y - DIR[thisDir].y*thisSpeed*15 };
                     }
                     var tailGrad = context.createLinearGradient(gradStart.x,gradStart.y,gradEnd.x,gradEnd.y);
-                    tailGrad.addColorStop(0,'rgba(255,255,255,' + Math.min(0.8,sp.speed/maxSpeed * 0.2) + ')');
-                    tailGrad.addColorStop(0.2,'rgba(255,255,255,' + Math.min(0.4,sp.speed/maxSpeed * 0.1) + ')');
-                    tailGrad.addColorStop(0.4,'rgba(255,255,255,' + Math.min(0.2,sp.speed/maxSpeed * 0.05) + ')');
+                    tailGrad.addColorStop(0,'rgba(255,255,255,' + Math.min(0.8,thisSpeed/maxSpeed * 0.2) + ')');
+                    tailGrad.addColorStop(0.2,'rgba(255,255,255,' + Math.min(0.4,thisSpeed/maxSpeed * 0.1) + ')');
+                    tailGrad.addColorStop(0.4,'rgba(255,255,255,' + Math.min(0.2,thisSpeed/maxSpeed * 0.05) + ')');
                     tailGrad.addColorStop(1,'rgba(255,255,255,0)');
                     context.fillStyle = tailGrad;
                     var tailRect = Canvas.getLineRectangle(start,end,1.5);
@@ -174,6 +180,22 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                 context.fillRect(sp.x+arena.pixels/2-glowSize,sp.y+arena.pixels/2-glowSize,glowSize*2,glowSize*2);
             };
             return sp;
+        },
+        HomeGate: function(game,x,y) {
+            var g = new Gate(game,x,y); g.name = 'Home Gate';
+            g.score = function(amount) {
+                game.player.score += parseInt(amount);
+            };
+            g.render = function(context) {
+                context.fillStyle = '#22aa44';
+                context.fillRect(g.x+1, g.y+1, game.arena.pixels-2, game.arena.pixels-2);
+                context.fillStyle = '#ffffff';
+                context.fillRect(g.x, g.y,1.5,1.5);
+                context.fillRect(g.x+game.arena.pixels-1.5, g.y,1.5,1.5);
+                context.fillRect(g.x+game.arena.pixels-1.5, g.y+game.arena.pixels-1.5,1.5,1.5);
+                context.fillRect(g.x, g.y+game.arena.pixels-1.5,1.5,1.5);
+            };
+            return g;
         },
         RedirGateLeft: function(game,x,y) {
             var g = RedirGate(game,x,y);

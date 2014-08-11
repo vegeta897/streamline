@@ -4,11 +4,12 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
 
     var debug = {};
     //debug.oneStream = true;
+    //debug.noGates = true;
     
     var game = { 
         arena: { width: 200, height: 100, pixels: 6 },  
         objects: { streams: [], streamX: {}, streamY: {}, collisions: [], gates: {}, gateX: {}, gateY: {} },
-        player: { input: {} },
+        player: { input: {}, score: 0 },
         fps: 60
     };
     game.frames = game.frameCount = game.localServerOffset = game.gateCount = game.framesPerSecond = 
@@ -22,11 +23,10 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
         if(dt > 60000) { console.log('too many updates missed! game crash'); game.crashed = game.paused = true; }
         if(dt > step) {
             while(dt >= step) { 
-                dt -= step; if(game.paused && !game.oneFrame) { continue; } 
+                dt -= step; if(game.paused && !game.oneFrame) { continue; } else { rendered = false; }
                 game.ticks++; update(step,dt,now);
                 game.oneFrame = false;
             }
-            rendered = false;
         }
         last = now;
     };
@@ -47,13 +47,18 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
 
 //    var fireRef = new Firebase('https://streamline.firebaseio.com'); TODO: Firebase
     
-    for(var ix = 0; ix < 19; ix++) {
-        for(var iy = 0; iy < 9; iy++) {
-            var gateDir = ['Up','Down','Left','Right'][Math.floor(Math.random()*4)];
-            new Objects['RedirGate'+gateDir](
-                game,(ix*10+10+Utility.randomInt(-5,4)),(iy*10+10+Utility.randomInt(-5,4)));
+    if(!debug.noGates) {
+        for(var ix = 0; ix < 19; ix++) {
+            for(var iy = 0; iy < 9; iy++) {
+                var gateDir = ['Up','Down','Left','Right'][Math.floor(Math.random()*4)];
+                new Objects['RedirGate'+gateDir](
+                    game,(ix*10+10+Utility.randomInt(-5,4)),(iy*10+10+Utility.randomInt(-5,4)));
+            }
         }
     }
+    
+    new Objects.HomeGate(game,100,50);
+    
 //    new Objects.RedirGateLeft(game,20,50);
 //    new Objects.RedirGateDown(game,15,50);
 //    new Objects.RedirGateRight(game,15,55);
@@ -122,7 +127,7 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
         if(game.ticks % 10 == 0) { // Every 10 frames
             Math.seedrandom(game.ticks);
             if(Math.random() > 0.08 && (game.objects.streams.length == 0 || !debug.oneStream)) {
-                game.objects.streams.push(Objects.StreamPixel(game.arena));
+                game.objects.streams.push(Objects.StreamPixel(game.arena,game.ticks));
             }
         }
         game.tickCount++;
