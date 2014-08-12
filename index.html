@@ -9,6 +9,12 @@
 <body>
     <header>
         <h1>Streamline</h1>
+        <section id="globalTime" ng-controller="Arena" ng-cloak ng-show="game.ticks">
+            <div class="unit" ng-repeat="unit in game.definitions.units">
+                <div class="number">{{ (game.ticks/480+2800000).toString(8) | digit:unit.digit }}</div>
+                <div class="label">{{ unit.name }}</div>
+            </div>
+        </section>
     </header>
     <section id="arena" ng-controller="Arena" ng-cloak>
         <canvas id="mainCanvas" width="1200" height="600">
@@ -46,7 +52,7 @@
             </div>
             <p>Click a button or press a hotkey to select a building type. <strong>Left click</strong> in the arena to build it, or <strong>right click</strong> to cancel</p>
             <dl>
-                <dt>Score: <strong>{{ game.player.score }}</strong></dt>
+                <dt>Score: <strong>{{ game.player.score | number }}</strong></dt>
             </dl>
         </section>
         <p ng-show="game.crashed" class="error"><strong>Game crashed!</strong> Please refresh.</p>
@@ -60,6 +66,7 @@
     <script src="app/app.js"></script>
     <script src="arena/arena.js"></script>
     <script src="canvas/canvas.js"></script>
+    <script src="common/filters.js"></script>
     <script src="common/utility.js"></script>
     <script src="controls/controls.js"></script>
     <script src="game/database.js"></script>

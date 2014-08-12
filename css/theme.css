@@ -6,6 +6,10 @@ h1 { font-size: 3em; color: #d3d9b9; text-shadow: none; -webkit-text-fill-color:
     background: -webkit-linear-gradient(left top, #f2f5eb, #d3d9b9);
     background: -o-linear-gradient(transparent, transparent); -webkit-background-clip: text; }
 
+#globalTime .unit .number { color: #C5C8D3; text-shadow: -1px 1px 3px rgba(255,255,255,0.1), 
+    2px 1px 2px rgba(0,0,0,0.4); }
+#globalTime .unit .label { color: #555; text-shadow: 1px 1px 2px rgba(0,0,0,0.4); }
+
 h2 { color: #f2f5eb; }
 
 section#arena { border-color: #222; background: #434767; }

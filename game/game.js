@@ -9,7 +9,11 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
         arena: { width: 200, height: 100, pixels: 6 },  
         objects: { streams: [], streamX: {}, streamY: {}, collisions: [], gates: {}, gateX: {}, gateY: {} },
         player: { input: {}, score: 0 },
-        fps: 60
+        fps: 60, definitions: { 
+            units: [{digit:8,name:'key'},{digit:7,name:'eon'},{digit:6,name:'chapter'},
+                {digit:5,name:'period'},{digit:4,name:'cycle'},{digit:3,name:'phase'},
+                {digit:2,name:'step'},{digit:1,name:'moment'}]
+        }
     };
     game.frames = game.frameCount = game.localServerOffset = game.gateCount = game.framesPerSecond = 
         game.tickCount = 0;
@@ -139,6 +143,6 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
         game: game,
         pause: function() { game.paused = true; }, resume: function() { game.paused = false; },
         oneFrame: function() { game.oneFrame = true; },
-        clearGates: function() { game.objects.gates = {}; }
+        clearGates: function() { game.objects.gates = {}; Database.clearGates(); }
     }
 });

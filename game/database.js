@@ -14,6 +14,9 @@ Application.Services.service('Database', function(localStorageService) {
             var storedGates = localStorageService.get('gates') || {};
             storedGates[x+':'+y] = type;
             localStorageService.set('gates',storedGates);
+        },
+        clearGates: function() {
+            localStorageService.remove('gates');
         }
     }
 });
