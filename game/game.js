@@ -1,10 +1,9 @@
 'use strict';
-Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $timeout) {
+Application.Services.service('Game', function(Canvas, Database, Input, Objects, Utility, $timeout) {
     console.log('game service initialized',performance.now());
-
     var debug = {};
     //debug.oneStream = true;
-    //debug.noGates = true;
+    debug.noGates = true;
     
     var game = { 
         arena: { width: 200, height: 100, pixels: 6 },  
@@ -36,6 +35,8 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
         if(!rendered) { $timeout(function(){}); Canvas.render(rt,game,step,game.ticks); rendered = true; }
         requestAnimationFrame(frame);
     };
+    
+    Database.init(game,Objects);
     
     setTimeout(function(){ // Wait a second for server time to sync
         game.localServerOffset = document.domain == 'localhost' ? 400 : ServerDate.now() - Date.now();
@@ -80,6 +81,7 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
         game.objects.streamX = {}; game.objects.streamY = {}; game.objects.gateX = {}; game.objects.gateY = {};
 //        var collision = {};
         if(game.player.build) {
+            Database.storeGate(game.player.build,game.player.cursor.x,game.player.cursor.y);
             new Objects[game.player.build](game,game.player.cursor.x,game.player.cursor.y);
             game.player.build = false;
         }
@@ -126,7 +128,7 @@ Application.Services.service('Game', function(Canvas, Input, Objects, Utility, $
         }
         if(game.ticks % 10 == 0) { // Every 10 frames
             Math.seedrandom(game.ticks);
-            if(Math.random() > 0.08 && (game.objects.streams.length == 0 || !debug.oneStream)) {
+            if(Math.random() > 0.2 && (game.objects.streams.length == 0 || !debug.oneStream)) {
                 game.objects.streams.push(Objects.StreamPixel(game.arena,game.ticks));
             }
         }

@@ -44,9 +44,7 @@
                 <button ng-click="buildGate('HomeGate')">H. <strong>Home Gate</strong></button>
                 <button ng-click="clearGates()">Clear Gates</button>
             </div>
-            <p>
-                Click a button or press a hotkey to select a building type. <strong>Left click</strong> in the arena to build it, or <strong>right click</strong> to cancel
-            </p>
+            <p>Click a button or press a hotkey to select a building type. <strong>Left click</strong> in the arena to build it, or <strong>right click</strong> to cancel</p>
             <dl>
                 <dt>Score: <strong>{{ game.player.score }}</strong></dt>
             </dl>
@@ -57,12 +55,14 @@
     <!-- JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="js/vendor/localStorageModule.js"></script>
     <script src='https://cdn.firebase.com/js/client/1.0.15/firebase.js'></script> <!-- Firebase -->
     <script src="app/app.js"></script>
     <script src="arena/arena.js"></script>
     <script src="canvas/canvas.js"></script>
     <script src="common/utility.js"></script>
     <script src="controls/controls.js"></script>
+    <script src="game/database.js"></script>
     <script src="game/game.js"></script>
     <script src="game/input.js"></script>
     <script src="game/objects.js"></script>
