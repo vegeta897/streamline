@@ -8,7 +8,7 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
     var game = { 
         arena: { width: 200, height: 100, pixels: 6 },  
         objects: { streams: [], streamX: {}, streamY: {}, collisions: [], gates: {}, gateX: {}, gateY: {} },
-        player: { input: {}, score: 0 },
+        player: { input: {}, score: parseInt(Database.getValue('score')), bits: parseInt(Database.getValue('bits')) },
         fps: 60, definitions: { 
             units: [{digit:8,name:'key'},{digit:7,name:'eon'},{digit:6,name:'chapter'},
                 {digit:5,name:'period'},{digit:4,name:'cycle'},{digit:3,name:'phase'},
@@ -17,6 +17,9 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
     };
     game.frames = game.frameCount = game.localServerOffset = game.gateCount = game.framesPerSecond = 
         game.tickCount = 0;
+    game.score = function(amount) { game.player.score += parseInt(amount); game.player.bits += parseInt(amount);
+        Database.setValue('score',game.player.score); Database.setValue('bits',game.player.bits); };
+    
     var now, dt = 0, last = 0, rendered = false, step = 1000/game.fps; // 60 FPS
     Canvas.setGridSize(game.arena.pixels,game);
 
@@ -83,7 +86,7 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
     var update = function(step,dt,now) {
         Input.process(game);
         game.objects.streamX = {}; game.objects.streamY = {}; game.objects.gateX = {}; game.objects.gateY = {};
-//        var collision = {};
+        if(game.player.building) { game.player.canAfford = game.player.bits >= Objects[game.player.building].cost; }
         if(game.player.build) {
             Database.storeGate(game.player.build,game.player.cursor.x,game.player.cursor.y);
             new Objects[game.player.build](game,game.player.cursor.x,game.player.cursor.y);
@@ -102,6 +105,7 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
                     : [game.objects.gates[gk]];
             game.gateCount++;
         }
+//        var collision = {};
         for(var sp = 0, spl = game.objects.streams.length; sp < spl; sp++) {
             var thisSP = game.objects.streams[sp];
 //            var spGrid = Math.round(thisSP.x/game.arena.pixels)+':'+Math.round(thisSP.y/game.arena.pixels);
@@ -132,7 +136,7 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
         }
         if(game.ticks % 10 == 0) { // Every 10 frames
             Math.seedrandom(game.ticks);
-            if(Math.random() > 0.2 && (game.objects.streams.length == 0 || !debug.oneStream)) {
+            if(Math.random() > 0.4 && (game.objects.streams.length == 0 || !debug.oneStream)) {
                 game.objects.streams.push(Objects.StreamPixel(game.arena,game.ticks));
             }
         }

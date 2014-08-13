@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.service('Input', function() {
+Application.Services.service('Input', function(Objects) {
     var KEY = { BACKSPACE: 8, TAB: 9, RETURN: 13, ESC: 27, SPACE: 32, PAGEUP: 33, PAGEDOWN: 34, END: 35,
         HOME: 36, LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, INSERT: 45, DELETE: 46, ZERO: 48, ONE: 49, TWO: 50,
         THREE: 51, FOUR: 52, FIVE: 53, SIX: 54, SEVEN: 55, EIGHT: 56, NINE: 57, A: 65, B: 66, C: 67, D: 68,
@@ -35,9 +35,10 @@ Application.Services.service('Input', function() {
                     game.player.building = BUILD[key]; break; }
             }
             if(input.mouse.left) {
-                if(game.player.building) { // If building, place object
-                    game.player.build = game.player.building;
-                    game.player.building = false;
+                // If building, place object
+                if(game.player.building && game.player.canAfford) { 
+                    game.score(-Objects[game.player.building].cost);
+                    game.player.build = game.player.building; game.player.building = false;
                 }
             }
             if(input.mouse.right) { // Cancel building

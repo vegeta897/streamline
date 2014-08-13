@@ -17,6 +17,12 @@ Application.Services.service('Database', function(localStorageService) {
         },
         clearGates: function() {
             localStorageService.remove('gates');
+        },
+        setValue: function(name,value) {
+            localStorageService.set(name,value);
+        },
+        getValue: function(name) {
+            return localStorageService.get(name) || false;
         }
     }
 });

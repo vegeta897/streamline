@@ -58,7 +58,7 @@ Application.Services.service('Canvas', function() {
             highContext.fillStyle = 'rgba(255,255,255,' + (0.08 + cursor.highlightY/100) + ')';
             highContext.fillRect(0,cursor.y*gridSize+0.5,highCanvas.width,gridSize-1);
             if(game.player.building) {
-                highContext.fillStyle = 'rgba(0,255,0,0.5)';
+                highContext.fillStyle = game.player.canAfford ? 'rgba(0,255,0,0.5)' : 'rgba(255,0,0,0.5)';
                 highContext.fillRect(cursor.x*gridSize,cursor.y*gridSize,gridSize,gridSize);
             } else {
                 highContext.fillStyle = 'rgba(255,255,255,0.3)';

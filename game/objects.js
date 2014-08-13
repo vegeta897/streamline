@@ -23,7 +23,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
     function Gate(game,x,y) { // Prototype for gate
         this.gameX = x; this.gameY = y; this.name = 'Generic Gate';
         this.x = x * game.arena.pixels; this.y = y * game.arena.pixels;
-        this.cost = 50; this.recent = []; this.recharge = 0;
+        this.cost = 100; this.recent = []; this.recharge = 0;
         game.objects.gates[this.gameX+':'+this.gameY] = this;
         this.render = function(context) {
             context.fillStyle = 'red';
@@ -44,7 +44,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
         g.direction = 'up'; // New direction for pixels
         g.init = function() { g.name = Utility.capitalize(g.direction) + ' Redirection Gate'; };
         g.outX = 0; g.outY = -game.arena.pixels; // Where pixels are output
-        g.cost = 100;
+        g.cost = 250;
         g.render = function(context) {
             context.fillStyle = 'rgb(' + Math.min(255,(32 + g.recent.length*6)) + ',32,72)';
             context.fillRect(g.x, g.y, game.arena.pixels, game.arena.pixels);
@@ -184,7 +184,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
         HomeGate: function(game,x,y) {
             var g = new Gate(game,x,y); g.name = 'Home Gate';
             g.score = function(amount) {
-                game.player.score += parseInt(amount);
+                game.score(amount);
             };
             g.render = function(context) {
                 context.fillStyle = '#22aa44';
