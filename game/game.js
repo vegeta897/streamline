@@ -17,8 +17,10 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
     };
     game.frames = game.frameCount = game.localServerOffset = game.gateCount = game.framesPerSecond = 
         game.tickCount = 0;
-    game.score = function(amount) { game.player.score += parseInt(amount); game.player.bits += parseInt(amount);
-        Database.setValue('score',game.player.score); Database.setValue('bits',game.player.bits); };
+    game.score = function(amount) { game.player.score += parseInt(amount); 
+        Database.setValue('score',game.player.score);  };
+    game.bits = function(amount) { game.player.bits += parseInt(amount); 
+        Database.setValue('bits',game.player.bits); };
     
     var now, dt = 0, last = 0, rendered = false, step = 1000/game.fps; // 60 FPS
     Canvas.setGridSize(game.arena.pixels,game);
@@ -86,12 +88,13 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
     var update = function(step,dt,now) {
         Input.process(game);
         game.objects.streamX = {}; game.objects.streamY = {}; game.objects.gateX = {}; game.objects.gateY = {};
-        if(game.player.building) { game.player.canAfford = game.player.bits >= Objects[game.player.building].cost; }
-        if(game.player.build) {
+        if(game.player.building) { game.player.canAfford = game.player.bits >= Objects.COSTS[game.player.building]; }
+        if(game.player.build && game.player.canAfford) {
+            game.bits(-Objects.COSTS[game.player.build]);
             Database.storeGate(game.player.build,game.player.cursor.x,game.player.cursor.y);
             new Objects[game.player.build](game,game.player.cursor.x,game.player.cursor.y);
-            game.player.build = false;
-        }
+            game.player.build = game.player.building = false;
+        } else { game.player.build = false; }
         game.gateCount = 0;
         for(var gk in game.objects.gates) { if(!game.objects.gates.hasOwnProperty(gk)) { continue; }
             game.objects.gates[gk].update(game);

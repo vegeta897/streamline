@@ -20,10 +20,12 @@ Application.Services.service('Objects', function(Utility, Canvas) {
         this.update = function() { this.move(); };
     }
     
+    var COSTS = { RedirGateLeft: 250, RedirGateRight: 250, RedirGateUp: 250, RedirGateDown: 250 };
+    
     function Gate(game,x,y) { // Prototype for gate
         this.gameX = x; this.gameY = y; this.name = 'Generic Gate';
         this.x = x * game.arena.pixels; this.y = y * game.arena.pixels;
-        this.cost = 100; this.recent = []; this.recharge = 0;
+        this.recent = []; this.recharge = 0;
         game.objects.gates[this.gameX+':'+this.gameY] = this;
         this.render = function(context) {
             context.fillStyle = 'red';
@@ -44,7 +46,6 @@ Application.Services.service('Objects', function(Utility, Canvas) {
         g.direction = 'up'; // New direction for pixels
         g.init = function() { g.name = Utility.capitalize(g.direction) + ' Redirection Gate'; };
         g.outX = 0; g.outY = -game.arena.pixels; // Where pixels are output
-        g.cost = 250;
         g.render = function(context) {
             context.fillStyle = 'rgb(' + Math.min(255,(32 + g.recent.length*6)) + ',32,72)';
             context.fillRect(g.x, g.y, game.arena.pixels, game.arena.pixels);
@@ -108,7 +109,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                             sp.direction = lineGates[lg].direction; sp.speed *= 1.07; // ~35 bounces for speed 6
                         }
                         if(lineGates[lg].name == 'Home Gate') {
-                            lineGates[lg].score(sp.speed*10); sp.speed = 0;
+                            game.score(sp.speed*10); game.bits(sp.speed*10); sp.speed = 0;
                         }
                     }
                 }
@@ -183,9 +184,6 @@ Application.Services.service('Objects', function(Utility, Canvas) {
         },
         HomeGate: function(game,x,y) {
             var g = new Gate(game,x,y); g.name = 'Home Gate';
-            g.score = function(amount) {
-                game.score(amount);
-            };
             g.render = function(context) {
                 context.fillStyle = '#22aa44';
                 context.fillRect(g.x+1, g.y+1, game.arena.pixels-2, game.arena.pixels-2);
@@ -216,6 +214,7 @@ Application.Services.service('Objects', function(Utility, Canvas) {
             var g = RedirGate(game,x,y);
             g.direction = 'right'; g.outX = 1; g.outY = 0; g.init();
             return g;
-        }
+        },
+        COSTS: COSTS
     }
 });

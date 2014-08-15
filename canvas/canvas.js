@@ -33,19 +33,18 @@ Application.Services.service('Canvas', function() {
                 game.objects.gates[gk].render(mainContext);
             }
             // Render stream collisions
-            for(var c = 0, cl = game.objects.collisions.length; c < cl; c++) {
-                var thisC = game.objects.collisions[c];
-                var age = Math.min(30,game.ticks - thisC.tick);
-                var colGrad = mainContext.createRadialGradient(
-                    thisC.x + gridSize/2, thisC.y + gridSize/2, 0,
-                    thisC.x + gridSize/2, thisC.y + gridSize/2, 12
-                );
-                colGrad.addColorStop(0,'rgba(255,255,255,' + (0.8 * (thisC.intensity/10) * (30-age)/30) + ')');
-                colGrad.addColorStop((30-age)/30,'rgba(255,255,255,0)');
-                mainContext.fillStyle = colGrad;
-                mainContext.fillRect(thisC.x + gridSize/2 - 12, thisC.y + gridSize/2 - 12,24, 24);
-            }
-            
+//            for(var c = 0, cl = game.objects.collisions.length; c < cl; c++) {
+//                var thisC = game.objects.collisions[c];
+//                var age = Math.min(30,game.ticks - thisC.tick);
+//                var colGrad = mainContext.createRadialGradient(
+//                    thisC.x + gridSize/2, thisC.y + gridSize/2, 0,
+//                    thisC.x + gridSize/2, thisC.y + gridSize/2, 12
+//                );
+//                colGrad.addColorStop(0,'rgba(255,255,255,' + (0.8 * (thisC.intensity/10) * (30-age)/30) + ')');
+//                colGrad.addColorStop((30-age)/30,'rgba(255,255,255,0)');
+//                mainContext.fillStyle = colGrad;
+//                mainContext.fillRect(thisC.x + gridSize/2 - 12, thisC.y + gridSize/2 - 12,24, 24);
+//            }
             // Render cursor
             highContext.clearRect(0,0,highCanvas.width,highCanvas.height);
             if(cursor.x == '-') { return; }

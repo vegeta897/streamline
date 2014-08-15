@@ -35,14 +35,11 @@ Application.Services.service('Input', function(Objects) {
                     game.player.building = BUILD[key]; break; }
             }
             if(input.mouse.left) {
-                // If building, place object
-                if(game.player.building && game.player.canAfford) { 
-                    game.score(-Objects[game.player.building].cost);
-                    game.player.build = game.player.building; game.player.building = false;
-                }
+                // If building
+                game.player.build = game.player.building ? game.player.building : false;
             }
             if(input.mouse.right) { // Cancel building
-                game.player.building = false;
+                game.player.building = game.player.build = false;
             }
         }
     }
