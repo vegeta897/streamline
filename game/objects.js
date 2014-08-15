@@ -79,20 +79,20 @@ Application.Services.service('Objects', function(Utility, Canvas) {
             var tailLength = function() { return sp.speed * 60 / 4; };
             sp.update = function(game) {
                 sp.move();
-                var gameX = Math.round(sp.x/arena.pixels), gameY = Math.round(sp.y/arena.pixels);
+                sp.gameX = Math.round(sp.x/arena.pixels); sp.gameY = Math.round(sp.y/arena.pixels);
                 var lineGates, reach, axis;
                 if(sp.direction == 'up' || sp.direction == 'down') {
-                    lineGates = game.objects.gateX[gameX] || []; axis = 'y';
+                    lineGates = game.objects.gateX[sp.gameX] || []; axis = 'y';
                     reach = sp.direction == 'up' ? sp.y - sp.speed/arena.pixels
                         : sp.y + sp.speed/arena.pixels;
-                    game.objects.streamX[gameX] = game.objects.streamX.hasOwnProperty(gameX) ?
-                        game.objects.streamX[gameX].concat([sp]) : [sp];
+                    game.objects.streamX[sp.gameX] = game.objects.streamX.hasOwnProperty(sp.gameX) ?
+                        game.objects.streamX[sp.gameX].concat([sp]) : [sp];
                 } else {
-                    lineGates = game.objects.gateY[gameY] || []; axis = 'x';
+                    lineGates = game.objects.gateY[sp.gameY] || []; axis = 'x';
                     reach = sp.direction == 'left' ? sp.x - sp.speed/arena.pixels
                         : sp.x + sp.speed/arena.pixels;
-                    game.objects.streamY[gameY] = game.objects.streamY.hasOwnProperty(gameY) ?
-                        game.objects.streamY[gameY].concat([sp]) : [sp];
+                    game.objects.streamY[sp.gameY] = game.objects.streamY.hasOwnProperty(sp.gameY) ?
+                        game.objects.streamY[sp.gameY].concat([sp]) : [sp];
                 }
                 var order = DIR[sp.direction].x + DIR[sp.direction].y < 0;
                 lineGates = Utility.sortArrayByProperty(lineGates,axis=='x'?'gameY':'gameX',order);

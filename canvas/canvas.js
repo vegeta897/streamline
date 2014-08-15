@@ -12,7 +12,8 @@ Application.Services.service('Canvas', function() {
     highCanvas.onselectstart = function() { return false; }; // Disable selecting and right clicking
     jQuery('body').on('contextmenu', '#highCanvas', function(e){ return false; });
 
-    var gridSize, game, cursor = { x: '-', y: '-', highlightX: 0, highlightY: 0 };
+    var gridSize, game, cursor = { 
+        x: '-', y: '-', highlightLeft: 0, highlightUp: 0, highlightDown: 0, highlightRight: 0 };
     
     var onMouseMove = function(e) {
         var offset = jQuery(mainCanvas).offset();
@@ -48,15 +49,37 @@ Application.Services.service('Canvas', function() {
             // Render cursor
             highContext.clearRect(0,0,highCanvas.width,highCanvas.height);
             if(cursor.x == '-') { return; }
-            cursor.highlightX += game.objects.streamX.hasOwnProperty(cursor.x) ? 3 : -1;
-            cursor.highlightX = Math.max(Math.min(cursor.highlightX,12),0);
-            highContext.fillStyle = 'rgba(255,255,255,' + (0.08 + cursor.highlightX/100) + ')';
-            highContext.fillRect(cursor.x*gridSize+0.5,0,gridSize-1,highCanvas.height);
-            cursor.highlightY += game.objects.streamY.hasOwnProperty(cursor.y) ? 3 : -1;
-            cursor.highlightY = Math.max(Math.min(cursor.highlightY,12),0);
-            highContext.fillStyle = 'rgba(255,255,255,' + (0.08 + cursor.highlightY/100) + ')';
-            highContext.fillRect(0,cursor.y*gridSize+0.5,highCanvas.width,gridSize-1);
-            if(game.player.building) {
+            var dirChecks = [
+                { stream: game.objects.streamX, cursorLine: cursor.x, sign: 1,
+                    cursorDepth: cursor.y, gameCoord: 'gameY',highlight: 'highlightUp'},
+                { stream: game.objects.streamX, cursorLine: cursor.x, sign: -1,
+                    cursorDepth: cursor.y, gameCoord: 'gameY',highlight: 'highlightDown'},
+                { stream: game.objects.streamY, cursorLine: cursor.y, sign: 1,
+                    cursorDepth: cursor.x, gameCoord: 'gameX',highlight: 'highlightLeft'},
+                { stream: game.objects.streamY, cursorLine: cursor.y, sign: -1,
+                    cursorDepth: cursor.x, gameCoord: 'gameX',highlight: 'highlightRight'}
+            ];
+            
+            for(var i = 0; i < dirChecks.length; i++) { var dir = dirChecks[i];
+                if(dir.stream.hasOwnProperty(dir.cursorLine)) {
+                    for(var ii = 0; ii < dir.stream[dir.cursorLine].length; ii++) {
+                        if(dir.stream[dir.cursorLine][ii][dir.gameCoord]*dir.sign <= dir.cursorDepth*dir.sign) { 
+                            cursor[dir.highlight] += 3; break; } } }
+                cursor[dir.highlight]--; cursor[dir.highlight] = Math.max(Math.min(cursor[dir.highlight],12),0);
+            }
+            
+            highContext.fillStyle = 'rgba(255,255,255,' + (0.08 + cursor.highlightUp/100) + ')';
+            highContext.fillRect(cursor.x*gridSize+0.5,0,gridSize-1,cursor.y*gridSize);
+            highContext.fillStyle = 'rgba(255,255,255,' + (0.08 + cursor.highlightDown/100) + ')';
+            highContext.fillRect(cursor.x*gridSize+0.5,cursor.y*gridSize+gridSize,
+                gridSize-1,highCanvas.height-cursor.y*gridSize);
+            highContext.fillStyle = 'rgba(255,255,255,' + (0.08 + cursor.highlightLeft/100) + ')';
+            highContext.fillRect(0,cursor.y*gridSize+0.5,cursor.x*gridSize,gridSize-1);
+            highContext.fillStyle = 'rgba(255,255,255,' + (0.08 + cursor.highlightRight/100) + ')';
+            highContext.fillRect(cursor.x*gridSize+gridSize,cursor.y*gridSize+0.5,
+                highCanvas.width-cursor.x*gridSize,gridSize-1);
+            
+            if(game.player.building) { // Building indicator
                 highContext.fillStyle = game.player.canAfford ? 'rgba(0,255,0,0.5)' : 'rgba(255,0,0,0.5)';
                 highContext.fillRect(cursor.x*gridSize,cursor.y*gridSize,gridSize,gridSize);
             } else {
