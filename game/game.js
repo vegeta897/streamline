@@ -8,7 +8,8 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
     var game = { 
         arena: { width: 200, height: 100, pixels: 6 },  
         objects: { streams: [], streamX: {}, streamY: {}, collisions: [], gates: {}, gateX: {}, gateY: {} },
-        player: { input: {}, score: parseInt(Database.getValue('score')), bits: parseInt(Database.getValue('bits')) },
+        player: { input: {}, score: parseInt(Database.getValue('score')) || 0, 
+            bits: parseInt(Database.getValue('bits')) || 0 },
         fps: 60, definitions: { 
             units: [{digit:8,name:'key'},{digit:7,name:'eon'},{digit:6,name:'chapter'},
                 {digit:5,name:'period'},{digit:4,name:'cycle'},{digit:3,name:'phase'},
