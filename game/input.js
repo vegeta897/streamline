@@ -17,7 +17,11 @@ Application.Services.service('Input', function(Objects) {
             case KEY.A: input.kb.a = pressed; e.preventDefault(); break;
             case KEY.S: input.kb.s = pressed; e.preventDefault(); break;
             case KEY.D: input.kb.d = pressed; e.preventDefault(); break;
+            case KEY.T: input.kb.t = pressed; e.preventDefault(); break;
+            case KEY.F: input.kb.f = pressed; e.preventDefault(); break;
+            case KEY.G: input.kb.g = pressed; e.preventDefault(); break;
             case KEY.H: input.kb.h = pressed; e.preventDefault(); break;
+            case KEY.Z: input.kb.z = pressed; e.preventDefault(); break;
         } 
     };
     var onMouse = function(e,button,pressed) {
@@ -27,7 +31,7 @@ Application.Services.service('Input', function(Objects) {
         }
     };
     var BUILD = { w: 'RedirGateUp', a: 'RedirGateLeft', s: 'RedirGateDown', d: 'RedirGateRight',
-        h: 'HomeGate' };
+        t: 'ReceiveGateUp', f: 'ReceiveGateLeft', g: 'ReceiveGateDown', h: 'ReceiveGateRight', z: 'HomeGate' };
     return {
         process: function(game) {
             for(var key in input.kb) { if(!input.kb.hasOwnProperty(key)) { continue; }

@@ -88,7 +88,7 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
 
     var update = function(step,dt,now) {
         Input.process(game);
-        game.objects.streamX = {}; game.objects.streamY = {}; game.objects.gateX = {}; game.objects.gateY = {};
+        game.objects.streamX = {}; game.objects.streamY = {}; //game.objects.gateX = {}; game.objects.gateY = {};
         if(game.player.building) { game.player.canAfford = game.player.bits >= Objects.COSTS[game.player.building]; }
         if(game.player.build && game.player.canAfford) {
             game.bits(-Objects.COSTS[game.player.build]);
@@ -99,14 +99,14 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
         game.gateCount = 0;
         for(var gk in game.objects.gates) { if(!game.objects.gates.hasOwnProperty(gk)) { continue; }
             game.objects.gates[gk].update(game);
-            game.objects.gateX[game.objects.gates[gk].gameX] =
-                game.objects.gateX.hasOwnProperty(game.objects.gates[gk].gameX) ?
-                    game.objects.gateX[game.objects.gates[gk].gameX].concat([game.objects.gates[gk]])
-                    : [game.objects.gates[gk]];
-            game.objects.gateY[game.objects.gates[gk].gameY] =
-                game.objects.gateY.hasOwnProperty(game.objects.gates[gk].gameY) ?
-                    game.objects.gateY[game.objects.gates[gk].gameY].concat([game.objects.gates[gk]])
-                    : [game.objects.gates[gk]];
+//            game.objects.gateX[game.objects.gates[gk].gameX] =
+//                game.objects.gateX.hasOwnProperty(game.objects.gates[gk].gameX) ?
+//                    game.objects.gateX[game.objects.gates[gk].gameX].concat([game.objects.gates[gk]])
+//                    : [game.objects.gates[gk]];
+//            game.objects.gateY[game.objects.gates[gk].gameY] =
+//                game.objects.gateY.hasOwnProperty(game.objects.gates[gk].gameY) ?
+//                    game.objects.gateY[game.objects.gates[gk].gameY].concat([game.objects.gates[gk]])
+//                    : [game.objects.gates[gk]];
             game.gateCount++;
         }
 //        var collision = {};
@@ -140,7 +140,7 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
         }
         if(game.ticks % 10 == 0) { // Every 10 frames
             Math.seedrandom(game.ticks);
-            if(Math.random() > 0.4 && (game.objects.streams.length == 0 || !debug.oneStream)) {
+            if(Math.random() > 0.8 && (game.objects.streams.length == 0 || !debug.oneStream)) {
                 game.objects.streams.push(Objects.StreamPixel(game.arena,game.ticks));
             }
         }
@@ -151,6 +151,7 @@ Application.Services.service('Game', function(Canvas, Database, Input, Objects, 
         game: game,
         pause: function() { game.paused = true; }, resume: function() { game.paused = false; },
         oneFrame: function() { game.oneFrame = true; },
-        clearGates: function() { game.objects.gates = {}; Database.clearGates(); }
+        clearGates: function() { 
+            game.objects.gates = {}; game.objects.gateX = {}; game.objects.gateY = {}; Database.clearGates(); }
     }
 });

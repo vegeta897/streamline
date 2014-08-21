@@ -1,6 +1,13 @@
 'use strict';
 Application.Services.service('Objects', function(Utility, Canvas) {
     var DIR = { up: {x:0,y:-1}, down: {x:0,y:1}, left: {x:-1,y:0}, right: {x:1,y:0} };
+    var FLIP = { up: 'down', down: 'up', left: 'right', right: 'left' };
+    
+    function Child(parent,x,y,pixels) { 
+        this.gameX = x; this.gameY = y; this.x = x * pixels; this.y = y * pixels;
+        this.update = function(){}; this.render = function(){}; this.parent = parent; 
+        // TODO: Remove self from gates gateX and gateY if parent has deleteMe property
+    }
     
     function Movable(arena) { // Prototype for movable object
         this.speed = this.x = this.y = 0;
@@ -20,13 +27,18 @@ Application.Services.service('Objects', function(Utility, Canvas) {
         this.update = function() { this.move(); };
     }
     
-    var COSTS = { RedirGateLeft: 250, RedirGateRight: 250, RedirGateUp: 250, RedirGateDown: 250 };
+    var COSTS = { RedirGateLeft: 250, RedirGateRight: 250, RedirGateUp: 250, RedirGateDown: 250,
+        ReceiveGateUp: 5000, ReceiveGateLeft: 5000, ReceiveGateDown: 5000, ReceiveGateRight: 5000 };
     
     function Gate(game,x,y) { // Prototype for gate
         this.gameX = x; this.gameY = y; this.name = 'Generic Gate';
         this.x = x * game.arena.pixels; this.y = y * game.arena.pixels;
         this.recent = []; this.recharge = 0;
         game.objects.gates[this.gameX+':'+this.gameY] = this;
+        game.objects.gateX[this.gameX] = game.objects.gateX.hasOwnProperty(this.gameX) ?
+            game.objects.gateX[this.gameX].concat([this]) : [this];
+        game.objects.gateY[this.gameY] = game.objects.gateY.hasOwnProperty(this.gameY) ? 
+            game.objects.gateY[this.gameY].concat([this]) : [this];
         this.render = function(context) {
             context.fillStyle = 'red';
             context.fillRect(this.x, this.y, game.arena.pixels, game.arena.pixels);
@@ -39,13 +51,31 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                 }
             }
         };
+        this.deleteGate = function(game) {
+            this.deleteMe = true;
+            var grid = this.gameX+':'+this.gameY;
+            delete game.objects.gates[grid];
+            for(var xi = 0, xl = game.objects.gateX[grid].length; xi < xl; xi++) {
+                if(game.objects.gateX[grid][xi].gameX == this.gameX 
+                    && game.objects.gateX[grid][xi].gameY == this.gameY) {
+                    game.objects.gateX[grid].splice(xi,1);
+                }
+            }
+            for(var yi = 0, yl = game.objects.gateY[grid].length; yi < yl; yi++) {
+                if(game.objects.gateY[grid][yi].gameX == this.gameX
+                    && game.objects.gateY[grid][yi].gameY == this.gameY) {
+                    game.objects.gateY[grid].splice(yi,1);
+                }
+            }
+        };
     }
     
     function RedirGate(game,x,y) { // Prototype for redirect gate
         var g = new Gate(game,x,y);
-        g.direction = 'up'; // New direction for pixels
-        g.init = function() { g.name = Utility.capitalize(g.direction) + ' Redirection Gate'; };
-        g.outX = 0; g.outY = -game.arena.pixels; // Where pixels are output
+        g.init = function() { 
+            g.name = Utility.capitalize(g.direction) + ' Redirection Gate';
+            g.outX = DIR[g.direction].x; g.outY = DIR[g.direction].y;
+        };
         g.render = function(context) {
             context.fillStyle = 'rgb(' + Math.min(255,(32 + g.recent.length*6)) + ',32,72)';
             context.fillRect(g.x, g.y, game.arena.pixels, game.arena.pixels);
@@ -54,6 +84,42 @@ Application.Services.service('Objects', function(Utility, Canvas) {
             context.fillStyle = 'rgba(255,255,255,'+ (1 - g.recharge/20) +')';
             var rect = Canvas.getLineRectangle({x:g.x+g.outX,y:g.y+g.outY},{x:g.x+g.outX*2,y:g.y+g.outY*2},1);
             context.fillRect(rect.x+game.arena.pixels/2,rect.y+game.arena.pixels/2,rect.width,rect.height);
+        };
+        return g;
+    }
+
+    function ReceiverGate(game,x,y) {
+        var g = new Gate(game,x,y);g.name = 'Receiver Gate';
+        g.pixelValue = 0.5;
+        g.init = function() { 
+            g.name = Utility.capitalize(g.direction) + ' Receiver Gate';
+            for(var xi = -Math.abs(DIR[g.direction].y); xi < 1 + Math.abs(DIR[g.direction].y); xi++) {
+                for(var yi = -Math.abs(DIR[g.direction].x); yi < 1 + Math.abs(DIR[g.direction].x); yi++) {
+                    if(!(xi == 0 && yi == 0)) {
+                        var child = new Child(g,+g.gameX+xi,+g.gameY+yi,game.arena.pixels);
+                        game.objects.gates[(+g.gameX+xi)+':'+(+g.gameY+yi)] = child;
+                        game.objects.gateX[+g.gameX+xi] = game.objects.gateX.hasOwnProperty(+g.gameX+xi) ?
+                            game.objects.gateX[+g.gameX+xi].concat([child]) : [child];
+                        game.objects.gateY[+g.gameY+yi] = game.objects.gateY.hasOwnProperty(+g.gameY+yi) ?
+                            game.objects.gateY[+g.gameY+yi].concat([child]) : [child];
+                    }
+                }
+            }
+        };
+        var pix = game.arena.pixels;
+        g.render = function(context) {
+            context.fillStyle = 'rgb(' + Math.min(255,(32 + g.recent.length*6)) + ',32,72)';
+            if(g.direction == 'left' || g.direction == 'right') {
+                context.fillRect(g.x, g.y - pix, pix, pix * 3);
+                context.fillStyle = 'rgba(255,255,255,'+ (1 - g.recharge/20) +')';
+                context.fillRect(g.x + pix/2 + DIR[g.direction].x * 1.5 - 1.5, g.y + 1 - pix, 3, pix * 3 - 2);
+                context.clearRect(g.x + pix/2 + DIR[g.direction].x * 2 - 1, g.y + 2 - pix, 2, pix * 3 - 4);
+            } else {
+                context.fillRect(g.x - pix, g.y, pix * 3, pix);
+                context.fillStyle = 'rgba(255,255,255,'+ (1 - g.recharge/20) +')';
+                context.fillRect(g.x + 1 - pix, g.y + pix/2 + DIR[g.direction].y * 1.5 - 1.5, pix * 3 - 2, 3);
+                context.clearRect(g.x + 2 - pix, g.y + pix/2 + DIR[g.direction].y * 2 - 1, pix * 3 - 4, 2);
+            }
         };
         return g;
     }
@@ -108,8 +174,13 @@ Application.Services.service('Objects', function(Utility, Canvas) {
                             lineGates[lg].recent.push(game.ticks); lineGates[lg].recharge = 20;
                             sp.direction = lineGates[lg].direction; sp.speed *= 1.07; // ~35 bounces for speed 6
                         }
-                        if(lineGates[lg].name == 'Home Gate') {
-                            game.score(sp.speed*10); game.bits(sp.speed*10); sp.speed = 0;
+                        if(lineGates[lg].hasOwnProperty('pixelValue') || lineGates[lg].parent) {
+                            var theGate = lineGates[lg].parent || lineGates[lg];
+                            if(!theGate.direction || FLIP[theGate.direction] == sp.direction) {
+                                theGate.recharge = 20;
+                                game.score(sp.speed*10*theGate.pixelValue);
+                                game.bits(sp.speed*10*theGate.pixelValue); sp.speed = 0;
+                            }
                         }
                     }
                 }
@@ -183,11 +254,11 @@ Application.Services.service('Objects', function(Utility, Canvas) {
             return sp;
         },
         HomeGate: function(game,x,y) {
-            var g = new Gate(game,x,y); g.name = 'Home Gate';
+            var g = new Gate(game,x,y); g.name = 'Home Gate'; g.pixelValue = 1;
             g.render = function(context) {
                 context.fillStyle = '#22aa44';
                 context.fillRect(g.x+1, g.y+1, game.arena.pixels-2, game.arena.pixels-2);
-                context.fillStyle = '#ffffff';
+                context.fillStyle = 'rgba(255,255,255,'+ (1 - g.recharge/20) +')';
                 context.fillRect(g.x, g.y,1.5,1.5);
                 context.fillRect(g.x+game.arena.pixels-1.5, g.y,1.5,1.5);
                 context.fillRect(g.x+game.arena.pixels-1.5, g.y+game.arena.pixels-1.5,1.5,1.5);
@@ -195,26 +266,22 @@ Application.Services.service('Objects', function(Utility, Canvas) {
             };
             return g;
         },
-        RedirGateLeft: function(game,x,y) {
-            var g = RedirGate(game,x,y);
-            g.direction = 'left'; g.outX = -1; g.outY = 0; g.init();
-            return g;
-        },
-        RedirGateDown: function(game,x,y) {
-            var g = RedirGate(game,x,y);
-            g.direction = 'down'; g.outX = 0; g.outY = 1; g.init();
-            return g;
-        },
-        RedirGateUp: function(game,x,y) {
-            var g = RedirGate(game,x,y);
-            g.direction = 'up'; g.outX = 0; g.outY = -1; g.init();
-            return g;
-        },
-        RedirGateRight: function(game,x,y) {
-            var g = RedirGate(game,x,y);
-            g.direction = 'right'; g.outX = 1; g.outY = 0; g.init();
-            return g;
-        },
+        RedirGateLeft: function(game,x,y) { 
+            var g = RedirGate(game,x,y); g.direction = 'left'; g.init(); return g; },
+        RedirGateDown: function(game,x,y) { 
+            var g = RedirGate(game,x,y); g.direction = 'down'; g.init(); return g; },
+        RedirGateUp: function(game,x,y) { 
+            var g = RedirGate(game,x,y); g.direction = 'up'; g.init(); return g; },
+        RedirGateRight: function(game,x,y) { 
+            var g = RedirGate(game,x,y); g.direction = 'right'; g.init(); return g; },
+        ReceiveGateLeft: function(game,x,y) { 
+            var g = ReceiverGate(game,x,y); g.direction = 'left'; g.init(); return g; },
+        ReceiveGateDown: function(game,x,y) { 
+            var g = ReceiverGate(game,x,y); g.direction = 'down'; g.init(); return g; },
+        ReceiveGateUp: function(game,x,y) { 
+            var g = ReceiverGate(game,x,y); g.direction = 'up'; g.init(); return g; },
+        ReceiveGateRight: function(game,x,y) { 
+            var g = ReceiverGate(game,x,y); g.direction = 'right'; g.init(); return g; },
         COSTS: COSTS
     }
 });
